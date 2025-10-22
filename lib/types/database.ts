@@ -1,0 +1,250 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      contacts: {
+        Row: {
+          id: string
+          email: string
+          name: string | null
+          phone: string | null
+          company: string | null
+          lead_status: 'new' | 'qualified' | 'disqualified' | 'contacted' | 'converted'
+          tags: string[] | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name?: string | null
+          phone?: string | null
+          company?: string | null
+          lead_status?: 'new' | 'qualified' | 'disqualified' | 'contacted' | 'converted'
+          tags?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string | null
+          phone?: string | null
+          company?: string | null
+          lead_status?: 'new' | 'qualified' | 'disqualified' | 'contacted' | 'converted'
+          tags?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      email_sequences: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          intervals: number[]
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          intervals?: number[]
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          intervals?: number[]
+          active?: boolean
+          created_at?: string
+        }
+      }
+      email_templates: {
+        Row: {
+          id: string
+          sequence_id: string
+          order_index: number
+          subject: string
+          body_html: string
+          body_text: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          sequence_id: string
+          order_index: number
+          subject: string
+          body_html: string
+          body_text: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          sequence_id?: string
+          order_index?: number
+          subject?: string
+          body_html?: string
+          body_text?: string
+          created_at?: string
+        }
+      }
+      contact_sequences: {
+        Row: {
+          id: string
+          contact_id: string
+          sequence_id: string
+          status: 'active' | 'paused' | 'completed' | 'unsubscribed'
+          current_step: number
+          started_at: string
+          last_sent_at: string | null
+        }
+        Insert: {
+          id?: string
+          contact_id: string
+          sequence_id: string
+          status?: 'active' | 'paused' | 'completed' | 'unsubscribed'
+          current_step?: number
+          started_at?: string
+          last_sent_at?: string | null
+        }
+        Update: {
+          id?: string
+          contact_id?: string
+          sequence_id?: string
+          status?: 'active' | 'paused' | 'completed' | 'unsubscribed'
+          current_step?: number
+          started_at?: string
+          last_sent_at?: string | null
+        }
+      }
+      email_logs: {
+        Row: {
+          id: string
+          contact_id: string
+          sequence_id: string
+          template_id: string
+          resend_email_id: string | null
+          status: 'pending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'bounced' | 'failed'
+          sent_at: string | null
+          opened_at: string | null
+          clicked_at: string | null
+          replied_at: string | null
+          unsubscribed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          contact_id: string
+          sequence_id: string
+          template_id: string
+          resend_email_id?: string | null
+          status?: 'pending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'bounced' | 'failed'
+          sent_at?: string | null
+          opened_at?: string | null
+          clicked_at?: string | null
+          replied_at?: string | null
+          unsubscribed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          contact_id?: string
+          sequence_id?: string
+          template_id?: string
+          resend_email_id?: string | null
+          status?: 'pending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'bounced' | 'failed'
+          sent_at?: string | null
+          opened_at?: string | null
+          clicked_at?: string | null
+          replied_at?: string | null
+          unsubscribed_at?: string | null
+          created_at?: string
+        }
+      }
+      contact_notes: {
+        Row: {
+          id: string
+          contact_id: string
+          note: string
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          contact_id: string
+          note: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          contact_id?: string
+          note?: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      email_queue: {
+        Row: {
+          id: string
+          contact_id: string
+          sequence_id: string
+          template_id: string
+          scheduled_at: string
+          priority: number
+          status: 'pending' | 'sent' | 'failed'
+          retry_count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          contact_id: string
+          sequence_id: string
+          template_id: string
+          scheduled_at: string
+          priority?: number
+          status?: 'pending' | 'sent' | 'failed'
+          retry_count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          contact_id?: string
+          sequence_id?: string
+          template_id?: string
+          scheduled_at?: string
+          priority?: number
+          status?: 'pending' | 'sent' | 'failed'
+          retry_count?: number
+          created_at?: string
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
