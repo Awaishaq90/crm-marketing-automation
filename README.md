@@ -1,32 +1,52 @@
-# CRM Marketing Automation
+# CRM Marketing Automation System
 
-A lean CRM system with marketing automation built with Next.js 15, Supabase, and Resend.
+A modern CRM system built with Next.js 15, Supabase, and Resend for email marketing automation.
 
 ## Features
 
-- **Contact Management**: Add, edit, delete contacts with lead status tracking and notes
-- **CSV Import**: Bulk import contacts from CSV files
-- **Email Sequences**: Create 4-email automation sequences with customizable intervals
-- **Marketing Automation**: Manual trigger system with email queue and rate limiting
-- **Analytics Dashboard**: Track open rates, click rates, and sequence performance
-- **Unsubscribe Management**: Personalized unsubscribe links with automatic sequence stopping
-- **Authentication**: Secure login with Supabase Auth
+- **Contact Management**: Import, manage, and organize contacts
+- **Email Sequences**: Create automated email marketing campaigns
+- **Analytics**: Track email performance and engagement
+- **Email Templates**: Rich HTML email templates with personalization
+- **Unsubscribe Management**: Built-in unsubscribe functionality
+- **Webhook Integration**: Real-time email event tracking
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Email**: Resend API
-- **UI**: Tailwind CSS + shadcn/ui components
-- **Analytics**: Resend webhooks for email tracking
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS, Radix UI components
+- **Backend**: Supabase (PostgreSQL, Auth, Real-time)
+- **Email Service**: Resend
+- **Deployment**: Vercel (recommended)
 
-## Setup Instructions
+## Getting Started
 
-### 1. Environment Variables
+### Prerequisites
 
-Create a `.env.local` file with the following variables:
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Resend account
 
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd crm
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+```bash
+cp env.example .env.local
+```
+
+4. Configure your environment variables in `.env.local`:
 ```env
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
@@ -43,94 +63,32 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 CRON_SECRET=your_cron_secret_here
 ```
 
-### 2. Database Setup
+5. Set up the database:
+   - Run the migration in `supabase/migrations/001_initial_schema.sql` in your Supabase dashboard
+   - Or use the Supabase CLI: `supabase db push`
 
-1. Create a new Supabase project
-2. Run the SQL migration in `supabase/migrations/001_initial_schema.sql`
-3. Enable Row Level Security (RLS) on all tables
-4. Configure authentication providers in Supabase dashboard
-
-### 3. Resend Setup
-
-1. Create a Resend account and get your API key
-2. Verify your domain in Resend dashboard
-3. Update the `from` email in `lib/resend.ts` with your verified domain
-4. Configure webhook endpoint in Resend: `https://yourdomain.com/api/webhooks/resend`
-
-### 4. Install Dependencies
-
-```bash
-npm install
-```
-
-### 5. Run Development Server
-
+6. Start the development server:
 ```bash
 npm run dev
 ```
 
-## Usage
-
-### Adding Contacts
-
-1. Navigate to `/contacts`
-2. Click "Add Contact" to create individual contacts
-3. Use "Import CSV" for bulk contact import
-
-### Creating Email Sequences
-
-1. Go to `/sequences`
-2. Click "Create Sequence"
-3. Configure 4 email templates with intervals
-4. Preview emails before saving
-
-### Triggering Sequences
-
-1. Visit `/contacts/trigger-sequence`
-2. Select a sequence and contacts
-3. Click "Trigger Sequence" to start automation
-
-### Monitoring Performance
-
-1. View dashboard metrics on the home page
-2. Check sequence analytics at `/sequences/[id]/analytics`
-3. Monitor email logs and engagement rates
-
-## API Endpoints
-
-- `POST /api/sequences/[id]/trigger` - Trigger sequence for selected contacts
-- `POST /api/cron/send-emails` - Process email queue (cron job)
-- `POST /api/webhooks/resend` - Receive Resend webhook events
-- `GET /unsubscribe/[token]` - Public unsubscribe page
-
-## Cron Job Setup
-
-For production, set up a cron job to process the email queue:
-
-```bash
-# Run every 5 minutes
-*/5 * * * * curl -X POST https://yourdomain.com/api/cron/send-emails -H "Authorization: Bearer YOUR_CRON_SECRET"
-```
-
-## Security Features
-
-- **Authentication**: Supabase Auth with email/password
-- **Row Level Security**: Database-level access control
-- **Webhook Verification**: Secure webhook signature validation
-- **Personalized Unsubscribe**: Contact-specific unsubscribe tokens
-- **Rate Limiting**: Respects Resend's 100 emails/batch limit
-
 ## Database Schema
 
-The system uses 7 main tables:
+The application uses the following main tables:
 
-1. **contacts** - Contact information and lead status
-2. **email_sequences** - Email sequence configurations
-3. **email_templates** - Individual email templates
-4. **contact_sequences** - Contact-sequence relationships
-5. **email_logs** - Email delivery and engagement tracking
-6. **contact_notes** - Contact interaction notes
-7. **email_queue** - Email sending queue with priority
+- `contacts` - Contact information
+- `email_sequences` - Marketing campaigns
+- `email_templates` - Email content templates
+- `contact_sequences` - Contact-campaign relationships
+- `email_queue` - Email sending queue
+- `email_logs` - Email delivery tracking
+
+## API Routes
+
+- `POST /api/sequences/[id]/trigger` - Trigger email sequence
+- `POST /api/webhooks/resend` - Resend webhook handler
+- `POST /api/auth/logout` - User logout
+- `POST /api/cron/send-emails` - Process email queue
 
 ## Deployment
 
@@ -139,24 +97,61 @@ The system uses 7 main tables:
 1. Connect your GitHub repository to Vercel
 2. Set environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
-4. Set up cron job using Vercel Cron
 
-### Other Platforms
+### Manual Deployment
 
-The app can be deployed to any platform that supports Next.js:
-- Netlify
-- Railway
-- DigitalOcean App Platform
-- AWS Amplify
+1. Build the application:
+```bash
+npm run build
+```
 
-## Support
+2. Start the production server:
+```bash
+npm start
+```
 
-For issues and questions:
-1. Check the implementation in the codebase
-2. Review the database schema and API endpoints
-3. Ensure all environment variables are configured correctly
-4. Verify Supabase and Resend configurations
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Yes |
+| `RESEND_API_KEY` | Resend API key for sending emails | Yes |
+| `NEXT_PUBLIC_APP_URL` | Application URL | Yes |
+| `CRON_SECRET` | Secret for cron job security | Yes |
+
+## Features Overview
+
+### Contact Management
+- Import contacts via CSV
+- Contact details and tags
+- Lead status tracking
+- Contact history
+
+### Email Sequences
+- Multi-step email campaigns
+- Customizable intervals
+- Rich HTML templates
+- Personalization variables
+
+### Analytics
+- Email open rates
+- Click tracking
+- Bounce handling
+- Unsubscribe management
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## License
 
-MIT License - feel free to use this project for your own CRM needs.
+MIT License - see LICENSE file for details
+
+## Support
+
+For support, please open an issue in the GitHub repository.
