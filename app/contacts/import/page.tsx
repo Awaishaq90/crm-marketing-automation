@@ -15,6 +15,11 @@ interface CSVRow {
   company?: string
   lead_status?: string
   tags?: string[]
+  facebook_url?: string
+  instagram_url?: string
+  linkedin_url?: string
+  website_url?: string
+  address?: string
 }
 
 export default function ImportContactsPage() {
@@ -76,6 +81,29 @@ export default function ImportContactsPage() {
             case 'tags':
               row.tags = value ? value.split(',').map(tag => tag.trim()) : undefined
               break
+            case 'website':
+            case 'website url':
+            case 'website_url':
+              row.website_url = value
+              break
+            case 'linkedin':
+            case 'linkedin url':
+            case 'linkedin_url':
+              row.linkedin_url = value
+              break
+            case 'facebook':
+            case 'facebook url':
+            case 'facebook_url':
+              row.facebook_url = value
+              break
+            case 'instagram':
+            case 'instagram url':
+            case 'instagram_url':
+              row.instagram_url = value
+              break
+            case 'address':
+              row.address = value
+              break
           }
         })
         
@@ -128,6 +156,29 @@ export default function ImportContactsPage() {
                 break
               case 'tags':
                 row.tags = value ? value.split(',').map(tag => tag.trim()) : undefined
+                break
+              case 'website':
+              case 'website url':
+              case 'website_url':
+                row.website_url = value
+                break
+              case 'linkedin':
+              case 'linkedin url':
+              case 'linkedin_url':
+                row.linkedin_url = value
+                break
+              case 'facebook':
+              case 'facebook url':
+              case 'facebook_url':
+                row.facebook_url = value
+                break
+              case 'instagram':
+              case 'instagram url':
+              case 'instagram_url':
+                row.instagram_url = value
+                break
+              case 'address':
+                row.address = value
                 break
             }
           })

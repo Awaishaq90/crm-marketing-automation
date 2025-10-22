@@ -6,6 +6,8 @@ export interface EmailData {
   to: string
   subject: string
   html: string
+  from?: string // Optional sender email, defaults to outreach@domain
+  fromName?: string // Optional sender name, defaults to CRM Outreach
   text?: string
   unsubscribeUrl?: string
 }
@@ -28,8 +30,12 @@ export class EmailService {
         headers['List-Unsubscribe'] = `<${emailData.unsubscribeUrl}>`
       }
 
+      // Use custom sender if provided, otherwise default to outreach@domain
+      const senderEmail = emailData.from || `outreach@${process.env.EMAIL_DOMAIN || 'yourdomain.com'}`
+      const senderName = emailData.fromName || 'CRM Outreach'
+      
       const { data, error } = await resend.emails.send({
-        from: 'CRM Marketing <noreply@yourdomain.com>', // Replace with your verified domain
+        from: `${senderName} <${senderEmail}>`,
         to: [emailData.to],
         subject: emailData.subject,
         html: emailData.html,

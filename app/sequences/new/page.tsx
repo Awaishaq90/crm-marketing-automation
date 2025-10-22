@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DEFAULT_EMAIL_INTERVALS } from '@/lib/constants'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
@@ -24,8 +25,10 @@ export default function NewSequencePage() {
     name: '',
     description: '',
     intervals: DEFAULT_EMAIL_INTERVALS,
-    active: true
+    active: true,
+    sender_email: ''
   })
+  const [senderEmails, setSenderEmails] = useState<{id: string, email: string, name: string, is_default: boolean}[]>([])
   const [templates, setTemplates] = useState<EmailTemplate[]>([
     { order_index: 1, subject: '', body_html: '', body_text: '' },
     { order_index: 2, subject: '', body_html: '', body_text: '' },
@@ -47,6 +50,26 @@ export default function NewSequencePage() {
       i === index ? { ...template, [field]: value } : template
     ))
   }
+
+  const loadSenderEmails = useCallback(async () => {
+    const { data } = await supabase
+      .from('sender_emails')
+      .select('*')
+      .eq('active', true)
+      .order('is_default', { ascending: false })
+      .order('name')
+    setSenderEmails(data || [])
+    
+    // Set default sender if available
+    const defaultSender = data?.find(s => s.is_default)
+    if (defaultSender) {
+      setSequenceData(prev => ({ ...prev, sender_email: defaultSender.email }))
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    loadSenderEmails()
+  }, [loadSenderEmails])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -156,6 +179,28 @@ export default function NewSequencePage() {
                       placeholder="Onboarding sequence for new users"
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sender_email">Sender Email</Label>
+                  <Select
+                    value={sequenceData.sender_email}
+                    onValueChange={(value) => handleSequenceChange('sender_email', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select sender email" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {senderEmails.map((sender) => (
+                        <SelectItem key={sender.id} value={sender.email}>
+                          {sender.name} ({sender.email})
+                          {sender.is_default && ' - Default'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-gray-500">
+                    Choose from your configured sender emails. <Link href="/settings" className="text-blue-600 hover:underline">Manage sender emails</Link>
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="intervals">Email Intervals (days)</Label>

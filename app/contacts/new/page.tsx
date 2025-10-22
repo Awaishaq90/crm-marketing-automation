@@ -18,7 +18,12 @@ export default function NewContactPage() {
     phone: '',
     company: '',
     lead_status: 'new' as const,
-    tags: ''
+    tags: '',
+    facebook_url: '',
+    instagram_url: '',
+    linkedin_url: '',
+    website_url: '',
+    address: ''
   })
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -155,6 +160,72 @@ export default function NewContactPage() {
                   <p className="text-sm text-muted-foreground">
                     Separate multiple tags with commas
                   </p>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-foreground">Social Media & Business Information</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="website_url" className="text-foreground font-medium">Website URL</Label>
+                      <Input
+                        id="website_url"
+                        type="url"
+                        value={formData.website_url}
+                        onChange={(e) => handleChange('website_url', e.target.value)}
+                        placeholder="https://example.com"
+                        className="border-input focus:ring-primary focus:border-primary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="linkedin_url" className="text-foreground font-medium">LinkedIn URL</Label>
+                      <Input
+                        id="linkedin_url"
+                        type="url"
+                        value={formData.linkedin_url}
+                        onChange={(e) => handleChange('linkedin_url', e.target.value)}
+                        placeholder="https://linkedin.com/in/username"
+                        className="border-input focus:ring-primary focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="facebook_url" className="text-foreground font-medium">Facebook URL</Label>
+                      <Input
+                        id="facebook_url"
+                        type="url"
+                        value={formData.facebook_url}
+                        onChange={(e) => handleChange('facebook_url', e.target.value)}
+                        placeholder="https://facebook.com/username"
+                        className="border-input focus:ring-primary focus:border-primary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="instagram_url" className="text-foreground font-medium">Instagram URL</Label>
+                      <Input
+                        id="instagram_url"
+                        type="url"
+                        value={formData.instagram_url}
+                        onChange={(e) => handleChange('instagram_url', e.target.value)}
+                        placeholder="https://instagram.com/username"
+                        className="border-input focus:ring-primary focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-foreground font-medium">Address</Label>
+                    <textarea
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => handleChange('address', e.target.value)}
+                      placeholder="123 Main St, City, State, ZIP"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                      rows={3}
+                    />
+                  </div>
                 </div>
 
                 {message && (

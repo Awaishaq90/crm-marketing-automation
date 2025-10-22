@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Plus, Mail, Phone, Building, Calendar, Tag } from 'lucide-react'
+import { Plus, Mail, Phone, Building, Calendar, Tag, Globe } from 'lucide-react'
 import Link from 'next/link'
 
 interface ContactPageProps {
@@ -125,6 +125,12 @@ export default async function ContactPage({ params }: ContactPageProps) {
               <Link href="/contacts">
                 <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">Back to Contacts</Button>
               </Link>
+              <Link href={`/contacts/${params.id}/send-email`}>
+                <Button className="bg-primary hover:bg-primary/90">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Send Email
+                </Button>
+              </Link>
               <Button className="bg-primary hover:bg-primary/90">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Note
@@ -176,6 +182,75 @@ export default async function ContactPage({ params }: ContactPageProps) {
                             {tag}
                           </Badge>
                         ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Social Media & Business Information */}
+                  {contact.website_url && (
+                    <div className="flex items-start space-x-3">
+                      <Globe className="w-4 h-4 text-muted-foreground mt-1" />
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Website</p>
+                        <a href={contact.website_url} target="_blank" rel="noopener noreferrer" 
+                           className="text-sm text-primary hover:underline">
+                          {contact.website_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {contact.linkedin_url && (
+                    <div className="flex items-start space-x-3">
+                      <div className="w-4 h-4 mt-1 bg-blue-600 rounded flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">in</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">LinkedIn</p>
+                        <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" 
+                           className="text-sm text-primary hover:underline">
+                          {contact.linkedin_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {contact.facebook_url && (
+                    <div className="flex items-start space-x-3">
+                      <div className="w-4 h-4 mt-1 bg-blue-600 rounded flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">f</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Facebook</p>
+                        <a href={contact.facebook_url} target="_blank" rel="noopener noreferrer" 
+                           className="text-sm text-primary hover:underline">
+                          {contact.facebook_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {contact.instagram_url && (
+                    <div className="flex items-start space-x-3">
+                      <div className="w-4 h-4 mt-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">ig</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Instagram</p>
+                        <a href={contact.instagram_url} target="_blank" rel="noopener noreferrer" 
+                           className="text-sm text-primary hover:underline">
+                          {contact.instagram_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {contact.address && (
+                    <div className="flex items-start space-x-3">
+                      <Building className="w-4 h-4 text-muted-foreground mt-1" />
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Address</p>
+                        <p className="text-sm text-foreground whitespace-pre-line">{contact.address}</p>
                       </div>
                     </div>
                   )}

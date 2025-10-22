@@ -9,6 +9,8 @@ interface QueueItem {
   scheduled_at: string
   priority: number
   status: string
+  sender_email?: string
+  sender_name?: string
   email_templates?: {
     body_html: string
     body_text: string
@@ -43,7 +45,7 @@ export class EmailQueue {
       // Get sequence details
       const { data: sequence, error: sequenceError } = await supabase
         .from('email_sequences')
-        .select('intervals')
+        .select('intervals, sender_email')
         .eq('id', sequenceId)
         .single()
 
@@ -86,7 +88,8 @@ export class EmailQueue {
         template_id: templates[0].id,
         scheduled_at: new Date().toISOString(),
         priority: EMAIL_QUEUE_PRIORITIES.HIGH,
-        status: 'pending' as const
+        status: 'pending' as const,
+        sender_email: sequence.sender_email
       }))
 
       const { error: queueError } = await supabase
@@ -211,6 +214,20 @@ export class EmailQueue {
   private async sendEmail(queueItem: QueueItem) {
     try {
       const { EmailService } = await import('@/lib/resend')
+      const supabase = await this.getSupabase()
+      
+      // Fetch sender name if sender_email is provided
+      let senderName = 'CRM Outreach'
+      if (queueItem.sender_email) {
+        const { data: sender } = await supabase
+          .from('sender_emails')
+          .select('name')
+          .eq('email', queueItem.sender_email)
+          .single()
+        if (sender) {
+          senderName = sender.name
+        }
+      }
       
       // Generate unsubscribe URL
       const unsubscribeUrl = EmailService.generateUnsubscribeUrl(queueItem.contact_id)
@@ -237,6 +254,8 @@ export class EmailQueue {
         subject: queueItem.email_templates?.subject || 'No Subject',
         html: processedHtml,
         text: processedText,
+        from: queueItem.sender_email,
+        fromName: senderName,
         unsubscribeUrl
       })
 
@@ -284,10 +303,10 @@ export class EmailQueue {
         return
       }
 
-      // Get sequence intervals
+      // Get sequence intervals and sender email
       const { data: sequence, error: sequenceError } = await supabase
         .from('email_sequences')
-        .select('intervals')
+        .select('intervals, sender_email')
         .eq('id', currentItem.sequence_id)
         .single()
 
@@ -316,7 +335,8 @@ export class EmailQueue {
           template_id: nextTemplate.id,
           scheduled_at: nextSendTime.toISOString(),
           priority: EMAIL_QUEUE_PRIORITIES.NORMAL,
-          status: 'pending'
+          status: 'pending',
+          sender_email: sequence.sender_email
         })
 
       // Update contact sequence current step
