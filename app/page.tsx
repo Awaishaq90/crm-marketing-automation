@@ -74,10 +74,12 @@ export default async function Dashboard() {
 
   recentEmails?.forEach(email => {
     if (email.sent_at) {
+      const contact = email.contacts as { name?: string; email?: string } | null
+      const template = email.email_templates as { subject?: string } | null
       activities.push({
         type: 'email',
         timestamp: email.sent_at,
-        description: `Email sent to ${(email.contacts as any)?.name || (email.contacts as any)?.email || 'Unknown'}: ${(email.email_templates as any)?.subject || 'No subject'}`
+        description: `Email sent to ${contact?.name || contact?.email || 'Unknown'}: ${template?.subject || 'No subject'}`
       })
     }
   })
@@ -91,10 +93,12 @@ export default async function Dashboard() {
   })
 
   recentSequences?.forEach(seq => {
+    const sequence = seq.email_sequences as { name?: string } | null
+    const contact = seq.contacts as { name?: string; email?: string } | null
     activities.push({
       type: 'sequence',
       timestamp: seq.started_at,
-      description: `Sequence "${(seq.email_sequences as any)?.name || 'Unknown'}" started for ${(seq.contacts as any)?.name || (seq.contacts as any)?.email || 'Unknown'}`
+      description: `Sequence "${sequence?.name || 'Unknown'}" started for ${contact?.name || contact?.email || 'Unknown'}`
     })
   })
 
