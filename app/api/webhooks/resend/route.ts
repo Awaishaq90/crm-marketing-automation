@@ -8,9 +8,14 @@ interface WebhookData {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('=== WEBHOOK REQUEST RECEIVED ===')
+  
   try {
     const body = await request.text()
     const signature = request.headers.get('resend-signature')
+    
+    console.log('Webhook body length:', body.length)
+    console.log('Signature present:', !!signature)
     
     // Verify webhook signature for security
     // TEMPORARILY DISABLED FOR TESTING - webhook signature verification
@@ -18,37 +23,45 @@ export async function POST(request: NextRequest) {
     //   console.error('Invalid webhook signature')
     //   return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     // }
-    
-    console.log('Webhook received - signature present:', !!signature)
 
     const event = JSON.parse(body)
+    console.log('=== PARSED EVENT ===')
+    console.log('Event type:', event.type)
+    console.log('Event data ID:', event.data?.id)
+    
     const supabase = await createClient()
-
-    console.log('Resend webhook event:', event.type, event.data?.id)
+    console.log('Supabase client created')
 
     switch (event.type) {
       case 'email.sent':
+        console.log('Processing email.sent')
         await handleEmailSent(supabase, event.data)
         break
       case 'email.delivered':
+        console.log('Processing email.delivered')
         await handleEmailDelivered(supabase, event.data)
         break
       case 'email.opened':
+        console.log('Processing email.opened')
         await handleEmailOpened(supabase, event.data)
         break
       case 'email.clicked':
+        console.log('Processing email.clicked')
         await handleEmailClicked(supabase, event.data)
         break
       case 'email.bounced':
+        console.log('Processing email.bounced')
         await handleEmailBounced(supabase, event.data)
         break
       case 'email.complained':
+        console.log('Processing email.complained')
         await handleEmailComplained(supabase, event.data)
         break
       default:
         console.log('Unhandled webhook event type:', event.type)
     }
 
+    console.log('=== WEBHOOK PROCESSED SUCCESSFULLY ===')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error processing webhook:', error)
@@ -131,16 +144,27 @@ async function handleEmailDelivered(supabase: SupabaseClient, data: WebhookData)
 
 async function handleEmailOpened(supabase: SupabaseClient, data: WebhookData) {
   try {
+    console.log('handleEmailOpened - looking for email with resend_email_id:', data.id)
     const timestamp = new Date().toISOString()
     
     // Get current email log to check existing status
-    const { data: emailLog } = await supabase
+    const { data: emailLog, error: fetchError } = await supabase
       .from('email_logs')
       .select('id, status, opened_at, open_count')
       .eq('resend_email_id', data.id)
       .single()
 
-    if (!emailLog) return
+    if (fetchError) {
+      console.error('Error fetching email log:', fetchError)
+      return
+    }
+
+    if (!emailLog) {
+      console.log('No email log found for resend_email_id:', data.id)
+      return
+    }
+    
+    console.log('Found email log:', emailLog.id, 'current open_count:', emailLog.open_count)
 
     // Prepare update data
     const updateData: Record<string, unknown> = {
@@ -163,19 +187,33 @@ async function handleEmailOpened(supabase: SupabaseClient, data: WebhookData) {
     }
 
     // Update email log
-    await supabase
+    console.log('Updating email log with data:', updateData)
+    const { error: updateError } = await supabase
       .from('email_logs')
       .update(updateData)
       .eq('resend_email_id', data.id)
 
+    if (updateError) {
+      console.error('Error updating email log:', updateError)
+      return
+    }
+
+    console.log('Email log updated successfully')
+
     // Insert event record
-    await supabase
+    const { error: eventError } = await supabase
       .from('email_events')
       .insert({
         email_log_id: emailLog.id,
         event_type: 'opened',
         event_data: data
       })
+
+    if (eventError) {
+      console.error('Error inserting email event:', eventError)
+    } else {
+      console.log('Email event inserted successfully')
+    }
   } catch (error) {
     console.error('Error updating email opened status:', error)
   }
