@@ -19,21 +19,14 @@ export default function GroupDetailPage() {
     color: string;
     created_at: string;
   } | null>(null)
-  const [members, setMembers] = useState<Array<{
-    id: string;
-    added_at: string;
-    contacts: {
-      id: string;
-      name: string | null;
-      email: string;
-      phone: string | null;
-      company: string | null;
-      lead_status: string;
-    } | null;
-  }>>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMembers, setIsLoadingMembers] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{
+    id: string;
+    email?: string;
+  } | null>(null)
   const [showAddContacts, setShowAddContacts] = useState(false)
   const router = useRouter()
   const params = useParams()

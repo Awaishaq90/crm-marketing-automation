@@ -40,14 +40,6 @@ export default function AddContactsToGroup({ groupId, onContactsAdded, onClose }
   const [message, setMessage] = useState('')
   const supabase = createClient()
 
-  useEffect(() => {
-    fetchContacts()
-  }, [fetchContacts])
-
-  useEffect(() => {
-    filterContacts()
-  }, [contacts, searchQuery, filterContacts])
-
   const fetchContacts = useCallback(async () => {
     try {
       const { data: contacts, error } = await supabase
@@ -82,6 +74,14 @@ export default function AddContactsToGroup({ groupId, onContactsAdded, onClose }
 
     setFilteredContacts(filtered)
   }, [contacts, searchQuery])
+
+  useEffect(() => {
+    fetchContacts()
+  }, [fetchContacts])
+
+  useEffect(() => {
+    filterContacts()
+  }, [contacts, searchQuery, filterContacts])
 
   const handleContactSelect = (contactId: string, checked: boolean) => {
     if (checked) {
