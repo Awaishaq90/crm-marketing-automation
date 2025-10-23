@@ -32,27 +32,27 @@ export default function EmailReplies({ contactId }: EmailRepliesProps) {
   const supabase = createClient()
 
   useEffect(() => {
-    loadReplies()
-  }, [contactId, loadReplies])
+    const loadReplies = async () => {
+      try {
+        const { data } = await supabase
+          .from('email_replies')
+          .select(`
+            *,
+            email_logs(subject, sent_at)
+          `)
+          .eq('contact_id', contactId)
+          .order('received_at', { ascending: false })
 
-  const loadReplies = async () => {
-    try {
-      const { data } = await supabase
-        .from('email_replies')
-        .select(`
-          *,
-          email_logs(subject, sent_at)
-        `)
-        .eq('contact_id', contactId)
-        .order('received_at', { ascending: false })
-
-      setReplies(data || [])
-    } catch (error) {
-      console.error('Error loading replies:', error)
-    } finally {
-      setIsLoading(false)
+        setReplies(data || [])
+      } catch (error) {
+        console.error('Error loading replies:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
+
+    loadReplies()
+  }, [contactId])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString()

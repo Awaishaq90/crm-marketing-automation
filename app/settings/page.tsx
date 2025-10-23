@@ -23,7 +23,6 @@ export default function SettingsPage() {
   const [senderEmails, setSenderEmails] = useState<SenderEmail[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [message, setMessage] = useState('')
-  const [editingId] = useState<string | null>(null)
   const [newSender, setNewSender] = useState({
     email: '',
     name: '',
@@ -33,19 +32,19 @@ export default function SettingsPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    loadSenderEmails()
-  }, [loadSenderEmails])
+    const loadSenderEmails = async () => {
+      const { data } = await supabase
+        .from('sender_emails')
+        .select('*')
+        .order('is_default', { ascending: false })
+        .order('name')
+      console.log('Loaded sender emails:', data)
+      setSenderEmails(data || [])
+      setIsLoading(false)
+    }
 
-  const loadSenderEmails = async () => {
-    const { data } = await supabase
-      .from('sender_emails')
-      .select('*')
-      .order('is_default', { ascending: false })
-      .order('name')
-    console.log('Loaded sender emails:', data)
-    setSenderEmails(data || [])
-    setIsLoading(false)
-  }
+    loadSenderEmails()
+  }, [])
 
   const handleAddSender = async (e: React.FormEvent) => {
     e.preventDefault()

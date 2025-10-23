@@ -26,7 +26,6 @@ export default function ImportContactsPage() {
   const [preview, setPreview] = useState<CSVRow[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const [imported] = useState(0)
   const supabase = createClient()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,7 +191,6 @@ export default function ImportContactsPage() {
         if (error) {
           setMessage(`Error importing contacts: ${error.message}`)
         } else {
-          setImported(contacts.length)
           setMessage(`Successfully imported ${contacts.length} contacts!`)
         }
       }
