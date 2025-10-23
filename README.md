@@ -2,6 +2,23 @@
 
 A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend for email marketing automation. Perfect for businesses looking to automate their outreach and nurture leads effectively.
 
+## 🆕 Recent Updates
+
+### Dashboard Improvements
+- ✅ **Fixed Stats Queries**: Resolved bug with count queries showing accurate real-time data
+- ✅ **Recent Activity Feed**: New section showing latest emails, contacts, and sequence activities
+- ✅ **Real-time Metrics**: Live dashboard with actual database statistics
+
+### Contact Management Enhancements
+- ✅ **Quick Search**: Added prominent real-time search bar with 150ms debouncing
+- ✅ **Advanced Filters**: Filter contacts by company and lead status
+- ✅ **Inline Status Editing**: Update contact status directly from table using dropdown
+- ✅ **Performance Optimization**: Added database indexes for faster search (migration `007_add_search_indexes.sql`)
+- ✅ **Loading Indicators**: Visual feedback during search and status updates
+
+### New API Endpoints
+- ✅ `PATCH /api/contacts/[id]/status` - Update contact lead status
+
 ## ✨ Key Features
 
 ### 📧 **Advanced Email Management**
@@ -15,11 +32,16 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 
 ### 👥 **Contact Management**
 - **CSV Import**: Bulk import contacts from CSV files
+- **Quick Search**: Real-time search across contact names and emails
+- **Advanced Filters**: Filter by company, lead status, and more
+- **Inline Status Editing**: Update contact status directly from the table
 - **Contact Organization**: Tags, lead status, and detailed profiles
 - **Individual Emails**: Send personalized one-off emails
 - **Contact History**: Track all interactions and communications
 
 ### 📊 **Analytics & Tracking**
+- **Live Dashboard**: Real-time stats for contacts, sequences, and email performance
+- **Recent Activity**: Track latest emails sent, contacts added, and sequence triggers
 - **Email Performance**: Open rates, click tracking, and delivery stats
 - **Real-time Webhooks**: Live email event tracking via Resend
 - **Bounce Handling**: Automatic bounce detection and management
@@ -90,7 +112,7 @@ CRON_SECRET=your_cron_secret_here
 ```
 
 5. **Set up the database:**
-   - Run all migrations in `supabase/migrations/` in your Supabase dashboard
+   - Run all migrations in `supabase/migrations/` in your Supabase dashboard (including the latest `007_add_search_indexes.sql` for optimized search performance)
    - Or use the Supabase CLI: `supabase db push`
 
 6. **Start the development server:**
@@ -117,10 +139,22 @@ The application uses the following main tables:
 - `sender_emails` - Configured sender email addresses with reply-to settings
 - `email_replies` - Track incoming email replies
 
+## 🧩 Components
+
+### Core Components
+- **QuickSearch** (`components/quick-search.tsx`) - Real-time search with debouncing
+- **ContactsFilter** (`components/contacts-filter.tsx`) - Advanced filtering for company and status
+- **StatusSelect** (`components/status-select.tsx`) - Inline dropdown for editing contact status
+- **EmailReplies** (`components/email-replies.tsx`) - Display and manage email replies
+
+### Custom Hooks
+- **useDebounce** (`lib/hooks/use-debounce.ts`) - Debounce hook for optimized search performance
+
 ## 🔌 API Routes
 
 - `POST /api/sequences/[id]/trigger` - Trigger email sequence
 - `POST /api/contacts/[id]/send-email` - Send individual email
+- `PATCH /api/contacts/[id]/status` - Update contact status
 - `POST /api/webhooks/resend` - Resend webhook handler
 - `POST /api/webhooks/email-replies` - Handle incoming email replies
 - `POST /api/auth/logout` - User logout
@@ -162,8 +196,12 @@ npm start
 
 ### 👥 Contact Management
 - **CSV Import**: Bulk import contacts from CSV files
+- **Quick Search**: Real-time search with debouncing (searches name and email simultaneously)
+- **Advanced Filters**: Filter by company name and lead status
+- **Inline Status Editing**: Click-to-edit dropdown for updating lead status
+- **Optimized Performance**: Database indexes for lightning-fast searches
 - **Contact Details**: Name, email, phone, company, tags
-- **Lead Status**: Track lead progression (new, qualified, converted, etc.)
+- **Lead Status**: Track lead progression (new, qualified, disqualified, contacted, converted)
 - **Contact History**: Complete interaction timeline
 - **Social Profiles**: LinkedIn, Facebook, Instagram integration
 
@@ -176,6 +214,9 @@ npm start
 - **Reply-To Configuration**: Set custom reply-to addresses for each sender
 
 ### 📊 Analytics & Tracking
+- **Live Dashboard**: Real-time statistics showing total contacts, sequences, emails sent, and open rates
+- **Recent Activity Feed**: Track the latest 5 activities across emails, contacts, and sequences
+- **Activity Timestamps**: Human-readable time formatting (e.g., "2 hours ago", "3 days ago")
 - **Email Performance**: Open rates, click tracking, delivery stats
 - **Real-time Webhooks**: Live email event tracking
 - **Bounce Handling**: Automatic bounce detection and management
@@ -204,6 +245,30 @@ npm start
 2. **Set Reply-To Addresses**: Add your Gmail or preferred email for receiving replies
 3. **Test Email Flow**: Send test emails and verify replies go to the correct address
 4. **Monitor Responses**: Track replies in the contact details page
+
+## 🎨 UI/UX Features
+
+### Dashboard
+- **Real-time Statistics**: Live metrics for contacts, sequences, emails sent, and open rates
+- **Recent Activity Feed**: See the 5 most recent activities including emails sent, contacts added, and sequence triggers
+- **Color-coded Activity Types**: Visual indicators for different activity types (blue for emails, green for contacts, purple for sequences)
+- **Time Formatting**: Human-readable timestamps (e.g., "just now", "2 hours ago", "3 days ago")
+
+### Contacts Page
+- **Quick Search Bar**: Large, prominent search input with real-time filtering
+- **Debounced Search**: Intelligent 150ms delay prevents excessive server requests
+- **Search Loading Indicators**: Visual feedback with pulsing search icon and spinner
+- **Advanced Filters Card**: Collapsible filters for company and status
+- **Inline Status Editor**: Click-to-edit dropdown for changing contact status without navigating away
+- **Optimistic UI Updates**: Status changes appear instantly with automatic revert on error
+- **Server-side Filtering**: Efficient filtering with URL query parameters for shareable filtered views
+- **Database Indexes**: Optimized search performance with indexed name and company fields
+
+### Performance Optimizations
+- **Debounced Inputs**: Reduce server load while maintaining responsive UI
+- **Indexed Queries**: Fast ILIKE searches on name and company fields
+- **Optimistic Updates**: Instant UI feedback while waiting for server responses
+- **Smart Caching**: Next.js automatic caching for faster page loads
 
 ## 🎯 Use Cases
 

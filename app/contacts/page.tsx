@@ -3,11 +3,23 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { Plus, Upload } from 'lucide-react'
 import Link from 'next/link'
+import { ContactsFilter } from '@/components/contacts-filter'
+import { QuickSearch } from '@/components/quick-search'
+import { StatusSelect } from '@/components/status-select'
 
-export default async function ContactsPage() {
+type SearchParams = Promise<{
+  search?: string
+  company?: string
+  status?: string
+}>
+
+export default async function ContactsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams
+}) {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -16,31 +28,37 @@ export default async function ContactsPage() {
     redirect('/login')
   }
 
-  // Fetch contacts
-  const { data: contacts, error } = await supabase
+  // Get filter values from URL params
+  const params = await searchParams
+  const searchQuery = params.search || ''
+  const companyQuery = params.company || ''
+  const statusQuery = params.status || ''
+
+  // Build query with filters
+  let query = supabase
     .from('contacts')
     .select('*')
-    .order('created_at', { ascending: false })
+
+  // Apply search filter (name or email)
+  if (searchQuery) {
+    query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
+  }
+
+  // Apply company filter
+  if (companyQuery) {
+    query = query.ilike('company', `%${companyQuery}%`)
+  }
+
+  // Apply status filter
+  if (statusQuery) {
+    query = query.eq('lead_status', statusQuery)
+  }
+
+  // Fetch contacts with filters
+  const { data: contacts, error } = await query.order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching contacts:', error)
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new':
-        return 'bg-status-new-bg text-status-new border-status-new/20'
-      case 'qualified':
-        return 'bg-status-qualified-bg text-status-qualified border-status-qualified/20'
-      case 'disqualified':
-        return 'bg-status-disqualified-bg text-status-disqualified border-status-disqualified/20'
-      case 'contacted':
-        return 'bg-status-contacted-bg text-status-contacted border-status-contacted/20'
-      case 'converted':
-        return 'bg-status-converted-bg text-status-converted border-status-converted/20'
-      default:
-        return 'bg-muted text-muted-foreground border-border'
-    }
   }
 
   return (
@@ -88,6 +106,12 @@ export default async function ContactsPage() {
             </div>
           </div>
 
+          <div className="mb-6">
+            <QuickSearch />
+          </div>
+
+          <ContactsFilter />
+
           <Card className="card-shadow border-border">
             <CardHeader>
               <CardTitle className="text-foreground">All Contacts</CardTitle>
@@ -117,9 +141,10 @@ export default async function ContactsPage() {
                         <TableCell>{contact.email}</TableCell>
                         <TableCell>{contact.company || '-'}</TableCell>
                         <TableCell>
-                          <Badge className={`${getStatusColor(contact.lead_status)} border font-medium`}>
-                            {contact.lead_status}
-                          </Badge>
+                          <StatusSelect 
+                            contactId={contact.id} 
+                            currentStatus={contact.lead_status}
+                          />
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {new Date(contact.created_at).toLocaleDateString()}

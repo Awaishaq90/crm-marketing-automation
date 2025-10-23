@@ -15,29 +15,109 @@ export default async function Dashboard() {
 
   // Fetch dashboard metrics
   const [
-    { data: contacts },
-    { data: sequences },
-    { data: emailLogs },
-    { data: activeSequences }
+    { count: contactsCount },
+    { count: sequencesCount },
+    { count: emailLogsCount },
+    { count: activeSequencesCount }
   ] = await Promise.all([
-    supabase.from('contacts').select('id', { count: 'exact', head: true }),
-    supabase.from('email_sequences').select('id', { count: 'exact', head: true }),
-    supabase.from('email_logs').select('id', { count: 'exact', head: true }),
-    supabase.from('contact_sequences').select('id', { count: 'exact', head: true }).eq('status', 'active')
+    supabase.from('contacts').select('*', { count: 'exact', head: true }),
+    supabase.from('email_sequences').select('*', { count: 'exact', head: true }),
+    supabase.from('email_logs').select('*', { count: 'exact', head: true }),
+    supabase.from('contact_sequences').select('*', { count: 'exact', head: true }).eq('status', 'active')
   ])
 
-  const totalContacts = contacts?.length || 0
-  const totalSequences = sequences?.length || 0
-  const totalEmailsSent = emailLogs?.length || 0
-  const activeContacts = activeSequences?.length || 0
+  const totalContacts = contactsCount || 0
+  const totalSequences = sequencesCount || 0
+  const totalEmailsSent = emailLogsCount || 0
+  const activeContacts = activeSequencesCount || 0
 
   // Calculate open rate
-  const { data: openedEmails } = await supabase
+  const { count: openedEmailsCount } = await supabase
     .from('email_logs')
-    .select('id', { count: 'exact', head: true })
+    .select('*', { count: 'exact', head: true })
     .not('opened_at', 'is', null)
 
-  const openRate = totalEmailsSent > 0 ? ((openedEmails?.length || 0) / totalEmailsSent * 100).toFixed(1) : '0'
+  const openRate = totalEmailsSent > 0 ? ((openedEmailsCount || 0) / totalEmailsSent * 100).toFixed(1) : '0'
+
+  // Fetch recent activity
+  const [
+    { data: recentEmails },
+    { data: recentContacts },
+    { data: recentSequences }
+  ] = await Promise.all([
+    supabase
+      .from('email_logs')
+      .select('id, sent_at, contacts(name, email), email_templates(subject)')
+      .not('sent_at', 'is', null)
+      .order('sent_at', { ascending: false })
+      .limit(3),
+    supabase
+      .from('contacts')
+      .select('id, name, email, created_at')
+      .order('created_at', { ascending: false })
+      .limit(3),
+    supabase
+      .from('contact_sequences')
+      .select('id, started_at, contacts(name, email), email_sequences(name)')
+      .order('started_at', { ascending: false })
+      .limit(3)
+  ])
+
+  // Combine and sort all activity by timestamp
+  type ActivityItem = {
+    type: 'email' | 'contact' | 'sequence'
+    timestamp: string
+    description: string
+  }
+
+  const activities: ActivityItem[] = []
+
+  recentEmails?.forEach(email => {
+    if (email.sent_at) {
+      activities.push({
+        type: 'email',
+        timestamp: email.sent_at,
+        description: `Email sent to ${(email.contacts as any)?.name || (email.contacts as any)?.email || 'Unknown'}: ${(email.email_templates as any)?.subject || 'No subject'}`
+      })
+    }
+  })
+
+  recentContacts?.forEach(contact => {
+    activities.push({
+      type: 'contact',
+      timestamp: contact.created_at,
+      description: `New contact added: ${contact.name || contact.email}`
+    })
+  })
+
+  recentSequences?.forEach(seq => {
+    activities.push({
+      type: 'sequence',
+      timestamp: seq.started_at,
+      description: `Sequence "${(seq.email_sequences as any)?.name || 'Unknown'}" started for ${(seq.contacts as any)?.name || (seq.contacts as any)?.email || 'Unknown'}`
+    })
+  })
+
+  // Sort by timestamp (most recent first) and take top 5
+  const sortedActivities = activities
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 5)
+
+  // Helper function to format timestamp
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date()
+    const past = new Date(timestamp)
+    const diffMs = now.getTime() - past.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'just now'
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+    return past.toLocaleDateString()
+  }
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -104,7 +184,7 @@ export default async function Dashboard() {
               <CardContent>
                 <div className="text-2xl font-bold text-primary">{openRate}%</div>
                 <p className="text-xs text-muted-foreground">
-                  {openedEmails?.length || 0} opened emails
+                  {openedEmailsCount || 0} opened emails
                 </p>
               </CardContent>
             </Card>
@@ -150,9 +230,35 @@ export default async function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  No recent activity. Start by adding contacts or creating email sequences.
-                </p>
+                {sortedActivities.length > 0 ? (
+                  <div className="space-y-4">
+                    {sortedActivities.map((activity, index) => (
+                      <div key={index} className="flex items-start space-x-3 text-sm">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {activity.type === 'email' && (
+                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                          )}
+                          {activity.type === 'contact' && (
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                          )}
+                          {activity.type === 'sequence' && (
+                            <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-foreground truncate">{activity.description}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {formatTimeAgo(activity.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No recent activity. Start by adding contacts or creating email sequences.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
