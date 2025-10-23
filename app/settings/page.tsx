@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,20 +31,20 @@ export default function SettingsPage() {
   })
   const supabase = createClient()
 
-  useEffect(() => {
-    const loadSenderEmails = async () => {
-      const { data } = await supabase
-        .from('sender_emails')
-        .select('*')
-        .order('is_default', { ascending: false })
-        .order('name')
-      console.log('Loaded sender emails:', data)
-      setSenderEmails(data || [])
-      setIsLoading(false)
-    }
+  const loadSenderEmails = useCallback(async () => {
+    const { data } = await supabase
+      .from('sender_emails')
+      .select('*')
+      .order('is_default', { ascending: false })
+      .order('name')
+    console.log('Loaded sender emails:', data)
+    setSenderEmails(data || [])
+    setIsLoading(false)
+  }, [supabase])
 
+  useEffect(() => {
     loadSenderEmails()
-  }, [])
+  }, [loadSenderEmails])
 
   const handleAddSender = async (e: React.FormEvent) => {
     e.preventDefault()

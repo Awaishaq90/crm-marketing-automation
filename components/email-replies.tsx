@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -31,28 +31,28 @@ export default function EmailReplies({ contactId }: EmailRepliesProps) {
   const [expandedReply, setExpandedReply] = useState<string | null>(null)
   const supabase = createClient()
 
-  useEffect(() => {
-    const loadReplies = async () => {
-      try {
-        const { data } = await supabase
-          .from('email_replies')
-          .select(`
-            *,
-            email_logs(subject, sent_at)
-          `)
-          .eq('contact_id', contactId)
-          .order('received_at', { ascending: false })
+  const loadReplies = useCallback(async () => {
+    try {
+      const { data } = await supabase
+        .from('email_replies')
+        .select(`
+          *,
+          email_logs(subject, sent_at)
+        `)
+        .eq('contact_id', contactId)
+        .order('received_at', { ascending: false })
 
-        setReplies(data || [])
-      } catch (error) {
-        console.error('Error loading replies:', error)
-      } finally {
-        setIsLoading(false)
-      }
+      setReplies(data || [])
+    } catch (error) {
+      console.error('Error loading replies:', error)
+    } finally {
+      setIsLoading(false)
     }
+  }, [supabase, contactId])
 
+  useEffect(() => {
     loadReplies()
-  }, [contactId])
+  }, [loadReplies])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,42 +36,42 @@ export default function TriggerSequencePage() {
   const [isLoadingData, setIsLoadingData] = useState(true)
   const supabase = createClient()
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Load contacts
-        const { data: contactsData, error: contactsError } = await supabase
-          .from('contacts')
-          .select('*')
-          .order('name', { ascending: true })
+  const loadData = useCallback(async () => {
+    try {
+      // Load contacts
+      const { data: contactsData, error: contactsError } = await supabase
+        .from('contacts')
+        .select('*')
+        .order('name', { ascending: true })
 
-        if (contactsError) {
-          console.error('Error loading contacts:', contactsError)
-        } else {
-          setContacts(contactsData || [])
-        }
-
-        // Load sequences
-        const { data: sequencesData, error: sequencesError } = await supabase
-          .from('email_sequences')
-          .select('*')
-          .eq('active', true)
-          .order('name', { ascending: true })
-
-        if (sequencesError) {
-          console.error('Error loading sequences:', sequencesError)
-        } else {
-          setSequences(sequencesData || [])
-        }
-      } catch (error) {
-        console.error('Error loading data:', error)
-      } finally {
-        setIsLoadingData(false)
+      if (contactsError) {
+        console.error('Error loading contacts:', contactsError)
+      } else {
+        setContacts(contactsData || [])
       }
-    }
 
+      // Load sequences
+      const { data: sequencesData, error: sequencesError } = await supabase
+        .from('email_sequences')
+        .select('*')
+        .eq('active', true)
+        .order('name', { ascending: true })
+
+      if (sequencesError) {
+        console.error('Error loading sequences:', sequencesError)
+      } else {
+        setSequences(sequencesData || [])
+      }
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setIsLoadingData(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   const handleContactToggle = (contactId: string) => {
     setSelectedContacts(prev => 

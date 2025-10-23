@@ -55,7 +55,8 @@ export class EmailService {
       console.log('EmailService - payload.reply_to:', emailPayload.reply_to)
       console.log('EmailService - payload.replyTo:', emailPayload.replyTo)
       console.log('EmailService - Calling resend.emails.send with:', emailPayload)
-      const { data, error } = await resend.emails.send(emailPayload as Record<string, unknown>)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await resend.emails.send(emailPayload as any)
 
       if (error) {
         throw new Error(`Resend error: ${error.message}`)
