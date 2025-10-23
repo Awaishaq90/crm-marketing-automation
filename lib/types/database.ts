@@ -141,6 +141,13 @@ export interface Database {
           clicked_at: string | null
           replied_at: string | null
           unsubscribed_at: string | null
+          delivered_at: string | null
+          bounced_at: string | null
+          complained_at: string | null
+          open_count: number
+          click_count: number
+          last_opened_at: string | null
+          last_clicked_at: string | null
           created_at: string
         }
         Insert: {
@@ -155,6 +162,13 @@ export interface Database {
           clicked_at?: string | null
           replied_at?: string | null
           unsubscribed_at?: string | null
+          delivered_at?: string | null
+          bounced_at?: string | null
+          complained_at?: string | null
+          open_count?: number
+          click_count?: number
+          last_opened_at?: string | null
+          last_clicked_at?: string | null
           created_at?: string
         }
         Update: {
@@ -169,6 +183,13 @@ export interface Database {
           clicked_at?: string | null
           replied_at?: string | null
           unsubscribed_at?: string | null
+          delivered_at?: string | null
+          bounced_at?: string | null
+          complained_at?: string | null
+          open_count?: number
+          click_count?: number
+          last_opened_at?: string | null
+          last_clicked_at?: string | null
           created_at?: string
         }
       }
@@ -257,6 +278,29 @@ export interface Database {
           color?: string
           created_at?: string
           updated_at?: string
+        }
+      }
+      email_events: {
+        Row: {
+          id: string
+          email_log_id: string
+          event_type: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained'
+          event_data: Record<string, unknown>
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email_log_id: string
+          event_type: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained'
+          event_data?: Record<string, unknown>
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email_log_id?: string
+          event_type?: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained'
+          event_data?: Record<string, unknown>
+          created_at?: string
         }
       }
       contact_group_members: {

@@ -6,12 +6,13 @@ import { CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
 interface UnsubscribePageProps {
-  params: {
+  params: Promise<{
     token: string
-  }
+  }>
 }
 
 export default async function UnsubscribePage({ params }: UnsubscribePageProps) {
+  const { token } = await params
   const supabase = await createClient()
   const emailQueue = new EmailQueue()
 
@@ -24,7 +25,7 @@ export default async function UnsubscribePage({ params }: UnsubscribePageProps) 
     const { data: contactData, error: contactError } = await supabase
       .from('contacts')
       .select('*')
-      .eq('id', params.token)
+      .eq('id', token)
       .single()
 
     if (contactError || !contactData) {
@@ -36,14 +37,14 @@ export default async function UnsubscribePage({ params }: UnsubscribePageProps) 
       const { data: existingSequences } = await supabase
         .from('contact_sequences')
         .select('status')
-        .eq('contact_id', params.token)
+        .eq('contact_id', token)
         .eq('status', 'unsubscribed')
 
       if (existingSequences && existingSequences.length > 0) {
         isUnsubscribed = true
       } else {
         // Unsubscribe from all sequences
-        await emailQueue.stopSequenceForContact(params.token)
+        await emailQueue.stopSequenceForContact(token)
         isUnsubscribed = true
       }
     }

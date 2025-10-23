@@ -8,12 +8,13 @@ import { Mail, Users, BarChart3, Edit } from 'lucide-react'
 import Link from 'next/link'
 
 interface SequencePageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function SequencePage({ params }: SequencePageProps) {
+  const { id } = await params
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -26,7 +27,7 @@ export default async function SequencePage({ params }: SequencePageProps) {
   const { data: sequence, error: sequenceError } = await supabase
     .from('email_sequences')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (sequenceError || !sequence) {
@@ -37,14 +38,14 @@ export default async function SequencePage({ params }: SequencePageProps) {
   const { data: templates } = await supabase
     .from('email_templates')
     .select('*')
-    .eq('sequence_id', params.id)
+    .eq('sequence_id', id)
     .order('order_index', { ascending: true })
 
   // Fetch contact sequences stats
   const { data: contactSequences } = await supabase
     .from('contact_sequences')
     .select('status')
-    .eq('sequence_id', params.id)
+    .eq('sequence_id', id)
 
   const stats = contactSequences?.reduce((acc, cs) => {
     acc[cs.status] = (acc[cs.status] || 0) + 1
@@ -84,7 +85,7 @@ export default async function SequencePage({ params }: SequencePageProps) {
               <Link href="/sequences">
                 <Button variant="outline">Back to Sequences</Button>
               </Link>
-              <Link href={`/sequences/${params.id}/analytics`}>
+              <Link href={`/sequences/${id}/analytics`}>
                 <Button variant="outline">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Analytics

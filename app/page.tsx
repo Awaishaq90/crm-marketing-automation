@@ -32,13 +32,23 @@ export default async function Dashboard() {
   const totalEmailsSent = emailLogsCount || 0
   const activeContacts = activeSequencesCount || 0
 
-  // Calculate open rate
-  const { count: openedEmailsCount } = await supabase
-    .from('email_logs')
-    .select('*', { count: 'exact', head: true })
-    .not('opened_at', 'is', null)
+  // Calculate open rate and click rate
+  const [
+    { count: openedEmailsCount },
+    { count: clickedEmailsCount }
+  ] = await Promise.all([
+    supabase
+      .from('email_logs')
+      .select('*', { count: 'exact', head: true })
+      .not('opened_at', 'is', null),
+    supabase
+      .from('email_logs')
+      .select('*', { count: 'exact', head: true })
+      .not('clicked_at', 'is', null)
+  ])
 
   const openRate = totalEmailsSent > 0 ? ((openedEmailsCount || 0) / totalEmailsSent * 100).toFixed(1) : '0'
+  const clickRate = totalEmailsSent > 0 ? ((clickedEmailsCount || 0) / totalEmailsSent * 100).toFixed(1) : '0'
 
   // Fetch recent activity
   const [
@@ -179,6 +189,17 @@ export default async function Dashboard() {
                 <div className="text-2xl font-bold text-primary">{totalEmailsSent}</div>
                 <p className="text-xs text-muted-foreground">
                   All time
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="card-shadow border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-foreground">Click Rate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">{clickRate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {clickedEmailsCount || 0} clicked emails
                 </p>
               </CardContent>
             </Card>

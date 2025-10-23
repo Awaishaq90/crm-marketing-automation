@@ -7,12 +7,13 @@ import { BarChart3, Mail, Users, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
 interface AnalyticsPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function SequenceAnalyticsPage({ params }: AnalyticsPageProps) {
+  const { id } = await params
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -25,7 +26,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
   const { data: sequence, error: sequenceError } = await supabase
     .from('email_sequences')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (sequenceError || !sequence) {
@@ -41,13 +42,13 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
     supabase
       .from('contact_sequences')
       .select('status')
-      .eq('sequence_id', params.id),
+      .eq('sequence_id', id),
     
     // Email logs for performance metrics
     supabase
       .from('email_logs')
-      .select('status, sent_at, opened_at, clicked_at')
-      .eq('sequence_id', params.id),
+      .select('status, sent_at, opened_at, clicked_at, open_count, click_count')
+      .eq('sequence_id', id),
     
     // Total contacts in system
     supabase
@@ -58,7 +59,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
     supabase
       .from('contact_sequences')
       .select('id', { count: 'exact', head: true })
-      .eq('sequence_id', params.id)
+      .eq('sequence_id', id)
       .eq('status', 'active')
   ])
 
@@ -72,6 +73,10 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
   const openedEmails = emailLogs?.filter(log => log.opened_at).length || 0
   const clickedEmails = emailLogs?.filter(log => log.clicked_at).length || 0
   
+  // Calculate total opens and clicks across all emails
+  const totalOpens = emailLogs?.reduce((sum, log) => sum + (log.open_count || 0), 0) || 0
+  const totalClicks = emailLogs?.reduce((sum, log) => sum + (log.click_count || 0), 0) || 0
+  
   const openRate = totalEmails > 0 ? ((openedEmails / totalEmails) * 100).toFixed(1) : '0'
   const clickRate = totalEmails > 0 ? ((clickedEmails / totalEmails) * 100).toFixed(1) : '0'
 
@@ -83,7 +88,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
       contacts(name, email),
       email_templates(subject)
     `)
-    .eq('sequence_id', params.id)
+    .eq('sequence_id', id)
     .order('created_at', { ascending: false })
     .limit(10)
 
@@ -135,7 +140,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
               <h1 className="text-2xl font-bold text-gray-900">{sequence.name} - Analytics</h1>
               <p className="text-gray-600">Performance metrics and insights</p>
             </div>
-            <Link href={`/sequences/${params.id}`}>
+            <Link href={`/sequences/${id}`}>
               <button className="text-sm text-blue-600 hover:text-blue-800">
                 ← Back to Sequence
               </button>
@@ -174,26 +179,26 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Open Rate</CardTitle>
-                <Mail className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{openRate}%</div>
-                <p className="text-xs text-muted-foreground">
-                  {openedEmails} of {totalEmails} emails
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Click Rate</CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{clickRate}%</div>
                 <p className="text-xs text-muted-foreground">
-                  {clickedEmails} of {totalEmails} emails
+                  {clickedEmails} of {totalEmails} emails ({totalClicks} total clicks)
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Open Rate</CardTitle>
+                <Mail className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{openRate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {openedEmails} of {totalEmails} emails ({totalOpens} total opens)
                 </p>
               </CardContent>
             </Card>
