@@ -8,16 +8,33 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 - ✅ **Fixed Stats Queries**: Resolved bug with count queries showing accurate real-time data
 - ✅ **Recent Activity Feed**: New section showing latest emails, contacts, and sequence activities
 - ✅ **Real-time Metrics**: Live dashboard with actual database statistics
+- ✅ **Groups Management**: Added "Manage Groups" button to Quick Actions section
 
 ### Contact Management Enhancements
 - ✅ **Quick Search**: Added prominent real-time search bar with 150ms debouncing
 - ✅ **Advanced Filters**: Filter contacts by company and lead status
 - ✅ **Inline Status Editing**: Update contact status directly from table using dropdown
+- ✅ **Contact Editing**: Full contact editing with dedicated edit page and API endpoint
 - ✅ **Performance Optimization**: Added database indexes for faster search (migration `007_add_search_indexes.sql`)
 - ✅ **Loading Indicators**: Visual feedback during search and status updates
 
+### 🆕 Contact Groups Feature
+- ✅ **Group Management**: Create, edit, and delete contact groups with color coding
+- ✅ **Group Members**: Add and remove contacts from groups with bulk operations
+- ✅ **Group Detail Pages**: View group information and manage members
+- ✅ **Add Contacts Modal**: Search and select multiple contacts to add to groups
+- ✅ **Responsive Tables**: Horizontal scroll for group member tables on all screen sizes
+- ✅ **Inline Status Editing**: Edit contact status directly from group member tables
+- ✅ **Database Schema**: Complete groups system with proper relationships and RLS policies
+
 ### New API Endpoints
 - ✅ `PATCH /api/contacts/[id]/status` - Update contact lead status
+- ✅ `PATCH /api/contacts/[id]` - Update full contact details
+- ✅ `GET/POST /api/groups` - List and create groups
+- ✅ `GET/PATCH/DELETE /api/groups/[id]` - Single group operations
+- ✅ `GET/POST /api/groups/[id]/members` - Group member management
+- ✅ `DELETE /api/groups/[id]/members/[contactId]` - Remove single member
+- ✅ `DELETE /api/groups/[id]/members/bulk` - Bulk remove members
 
 ## ✨ Key Features
 
@@ -35,9 +52,19 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 - **Quick Search**: Real-time search across contact names and emails
 - **Advanced Filters**: Filter by company, lead status, and more
 - **Inline Status Editing**: Update contact status directly from the table
+- **Contact Editing**: Full contact editing with dedicated edit page
 - **Contact Organization**: Tags, lead status, and detailed profiles
 - **Individual Emails**: Send personalized one-off emails
 - **Contact History**: Track all interactions and communications
+
+### 👥 **Contact Groups**
+- **Group Management**: Create, edit, and delete contact groups with color coding
+- **Group Members**: Add and remove contacts from groups with bulk operations
+- **Group Detail Pages**: View group information and manage members
+- **Add Contacts Modal**: Search and select multiple contacts to add to groups
+- **Responsive Tables**: Horizontal scroll for group member tables on all screen sizes
+- **Inline Status Editing**: Edit contact status directly from group member tables
+- **Group Navigation**: Easy access to groups from dashboard Quick Actions
 
 ### 📊 **Analytics & Tracking**
 - **Live Dashboard**: Real-time stats for contacts, sequences, and email performance
@@ -112,7 +139,7 @@ CRON_SECRET=your_cron_secret_here
 ```
 
 5. **Set up the database:**
-   - Run all migrations in `supabase/migrations/` in your Supabase dashboard (including the latest `007_add_search_indexes.sql` for optimized search performance)
+   - Run all migrations in `supabase/migrations/` in your Supabase dashboard (including the latest `008_add_contact_groups.sql` for the groups feature and `007_add_search_indexes.sql` for optimized search performance)
    - Or use the Supabase CLI: `supabase db push`
 
 6. **Start the development server:**
@@ -138,6 +165,8 @@ The application uses the following main tables:
 - `email_logs` - Email delivery tracking and analytics
 - `sender_emails` - Configured sender email addresses with reply-to settings
 - `email_replies` - Track incoming email replies
+- `contact_groups` - Contact groups with color coding and descriptions
+- `contact_group_members` - Many-to-many relationship between contacts and groups
 
 ## 🧩 Components
 
@@ -146,15 +175,29 @@ The application uses the following main tables:
 - **ContactsFilter** (`components/contacts-filter.tsx`) - Advanced filtering for company and status
 - **StatusSelect** (`components/status-select.tsx`) - Inline dropdown for editing contact status
 - **EmailReplies** (`components/email-replies.tsx`) - Display and manage email replies
+- **AddContactsToGroup** (`components/add-contacts-to-group.tsx`) - Modal for adding contacts to groups
 
 ### Custom Hooks
 - **useDebounce** (`lib/hooks/use-debounce.ts`) - Debounce hook for optimized search performance
 
 ## 🔌 API Routes
 
-- `POST /api/sequences/[id]/trigger` - Trigger email sequence
+### Contact Management
 - `POST /api/contacts/[id]/send-email` - Send individual email
 - `PATCH /api/contacts/[id]/status` - Update contact status
+- `PATCH /api/contacts/[id]` - Update full contact details
+
+### Email Sequences
+- `POST /api/sequences/[id]/trigger` - Trigger email sequence
+
+### Contact Groups
+- `GET/POST /api/groups` - List and create groups
+- `GET/PATCH/DELETE /api/groups/[id]` - Single group operations
+- `GET/POST /api/groups/[id]/members` - Group member management
+- `DELETE /api/groups/[id]/members/[contactId]` - Remove single member
+- `DELETE /api/groups/[id]/members/bulk` - Bulk remove members
+
+### System
 - `POST /api/webhooks/resend` - Resend webhook handler
 - `POST /api/webhooks/email-replies` - Handle incoming email replies
 - `POST /api/auth/logout` - User logout
@@ -199,11 +242,21 @@ npm start
 - **Quick Search**: Real-time search with debouncing (searches name and email simultaneously)
 - **Advanced Filters**: Filter by company name and lead status
 - **Inline Status Editing**: Click-to-edit dropdown for updating lead status
+- **Contact Editing**: Full contact editing with dedicated edit page and API endpoint
 - **Optimized Performance**: Database indexes for lightning-fast searches
 - **Contact Details**: Name, email, phone, company, tags
 - **Lead Status**: Track lead progression (new, qualified, disqualified, contacted, converted)
 - **Contact History**: Complete interaction timeline
 - **Social Profiles**: LinkedIn, Facebook, Instagram integration
+
+### 👥 Contact Groups
+- **Group Management**: Create, edit, and delete contact groups with color coding
+- **Group Members**: Add and remove contacts from groups with bulk operations
+- **Group Detail Pages**: View group information and manage members
+- **Add Contacts Modal**: Search and select multiple contacts to add to groups
+- **Responsive Tables**: Horizontal scroll for group member tables on all screen sizes
+- **Inline Status Editing**: Edit contact status directly from group member tables
+- **Group Navigation**: Easy access to groups from dashboard Quick Actions
 
 ### 📧 Email Sequences
 - **Multi-step Campaigns**: Create sophisticated email sequences

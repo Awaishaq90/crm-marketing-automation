@@ -233,6 +233,52 @@ export interface Database {
           created_at?: string
         }
       }
+      contact_groups: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          color: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          color?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          color?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      contact_group_members: {
+        Row: {
+          id: string
+          group_id: string
+          contact_id: string
+          added_at: string
+        }
+        Insert: {
+          id?: string
+          group_id: string
+          contact_id: string
+          added_at?: string
+        }
+        Update: {
+          id?: string
+          group_id?: string
+          contact_id?: string
+          added_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Plus, Mail, Phone, Building, Calendar, Tag, Globe } from 'lucide-react'
+import { Plus, Mail, Phone, Building, Calendar, Tag, Globe, Edit } from 'lucide-react'
 import Link from 'next/link'
 import EmailReplies from '@/components/email-replies'
 
@@ -127,6 +127,12 @@ export default async function ContactPage({ params }: ContactPageProps) {
             <div className="flex space-x-3">
               <Link href="/contacts">
                 <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">Back to Contacts</Button>
+              </Link>
+              <Link href={`/contacts/${id}/edit`}>
+                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Contact
+                </Button>
               </Link>
               <Link href={`/contacts/${id}/send-email`}>
                 <Button className="bg-primary hover:bg-primary/90">

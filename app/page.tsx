@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Users } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function Dashboard() {
@@ -221,6 +222,12 @@ export default async function Dashboard() {
                 <Link href="/contacts/trigger-sequence">
                   <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                     Trigger Sequence
+                  </Button>
+                </Link>
+                <Link href="/groups">
+                  <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                    <Users className="w-4 h-4 mr-2" />
+                    Manage Groups
                   </Button>
                 </Link>
               </CardContent>
