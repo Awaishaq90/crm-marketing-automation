@@ -80,7 +80,7 @@ export default function SendEmailPage() {
       } else {
         setMessage(result.error || 'Failed to send email')
       }
-    } catch (error) {
+    } catch {
       setMessage('An error occurred while sending the email')
     }
     

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,7 +26,7 @@ export default function ImportContactsPage() {
   const [preview, setPreview] = useState<CSVRow[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const [imported, setImported] = useState(0)
+  const [imported] = useState(0)
   const supabase = createClient()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

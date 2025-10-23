@@ -13,8 +13,7 @@ export async function POST(request: NextRequest) {
       subject,
       text,
       html,
-      messageId,
-      date
+      messageId
     } = body
 
     console.log('Received email reply:', { replyFrom, replyTo, subject })

@@ -37,7 +37,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
   }
 
   // Fetch contact notes
-  const { data: notes, error: notesError } = await supabase
+  const { data: notes } = await supabase
     .from('contact_notes')
     .select(`
       *,
@@ -47,7 +47,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
     .order('created_at', { ascending: false })
 
   // Fetch email logs for this contact
-  const { data: emailLogs, error: emailLogsError } = await supabase
+  const { data: emailLogs } = await supabase
     .from('email_logs')
     .select(`
       *,

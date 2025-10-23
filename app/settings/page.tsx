@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ArrowLeft, Plus, Trash2, Edit } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface SenderEmail {
@@ -23,7 +23,7 @@ export default function SettingsPage() {
   const [senderEmails, setSenderEmails] = useState<SenderEmail[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [message, setMessage] = useState('')
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingId] = useState<string | null>(null)
   const [newSender, setNewSender] = useState({
     email: '',
     name: '',
@@ -34,7 +34,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     loadSenderEmails()
-  }, [])
+  }, [loadSenderEmails])
 
   const loadSenderEmails = async () => {
     const { data } = await supabase

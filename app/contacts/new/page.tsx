@@ -48,7 +48,7 @@ export default function NewContactPage() {
       } else {
         router.push('/contacts')
       }
-    } catch (err) {
+    } catch {
       setMessage('An error occurred while creating the contact')
     }
 

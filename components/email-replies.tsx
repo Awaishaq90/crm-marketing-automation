@@ -33,7 +33,7 @@ export default function EmailReplies({ contactId }: EmailRepliesProps) {
 
   useEffect(() => {
     loadReplies()
-  }, [contactId])
+  }, [contactId, loadReplies])
 
   const loadReplies = async () => {
     try {
@@ -94,7 +94,7 @@ export default function EmailReplies({ contactId }: EmailRepliesProps) {
           <div className="text-center py-8 text-gray-500">
             <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>No replies yet</p>
-            <p className="text-sm">When this contact replies to your emails, they'll appear here</p>
+            <p className="text-sm">When this contact replies to your emails, they&apos;ll appear here</p>
           </div>
         </CardContent>
       </Card>

@@ -35,7 +35,7 @@ export class EmailService {
       const senderEmail = emailData.from || `outreach@${process.env.EMAIL_DOMAIN || 'yourdomain.com'}`
       const senderName = emailData.fromName || 'CRM Outreach'
       
-      const emailPayload: any = {
+      const emailPayload: Record<string, unknown> = {
         from: `${senderName} <${senderEmail}>`,
         to: [emailData.to],
         subject: emailData.subject,
@@ -51,22 +51,11 @@ export class EmailService {
       }
 
       // Debug logging
-      const fs = require('fs')
-      const debugInfo = {
-        timestamp: new Date().toISOString(),
-        emailData: emailData,
-        replyToValue: emailData.replyTo,
-        replyToType: typeof emailData.replyTo,
-        payloadReplyTo: emailPayload.reply_to,
-        fullPayload: emailPayload
-      }
-      fs.appendFileSync('email-debug.log', JSON.stringify(debugInfo, null, 2) + '\n---\n')
-      
       console.log('EmailService - emailData.replyTo:', emailData.replyTo)
       console.log('EmailService - payload.reply_to:', emailPayload.reply_to)
       console.log('EmailService - payload.replyTo:', emailPayload.replyTo)
       console.log('EmailService - Calling resend.emails.send with:', emailPayload)
-      const { data, error } = await resend.emails.send(emailPayload as any)
+      const { data, error } = await resend.emails.send(emailPayload as Record<string, unknown>)
 
       if (error) {
         throw new Error(`Resend error: ${error.message}`)

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Play, Users, Mail } from 'lucide-react'
+import { Play, Mail } from 'lucide-react'
 import Link from 'next/link'
 
 interface Contact {
@@ -35,12 +35,11 @@ export default function TriggerSequencePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [isLoadingData, setIsLoadingData] = useState(true)
-  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   const loadData = async () => {
     try {
@@ -120,7 +119,7 @@ export default function TriggerSequencePage() {
       } else {
         setMessage(result.error || 'Failed to trigger sequence')
       }
-    } catch (error) {
+    } catch {
       setMessage('An error occurred while triggering the sequence')
     }
 

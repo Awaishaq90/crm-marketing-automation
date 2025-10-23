@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Mail, Users, BarChart3, Play, Pause, Edit } from 'lucide-react'
+import { Mail, Users, BarChart3, Edit } from 'lucide-react'
 import Link from 'next/link'
 
 interface SequencePageProps {
@@ -34,14 +34,14 @@ export default async function SequencePage({ params }: SequencePageProps) {
   }
 
   // Fetch templates
-  const { data: templates, error: templatesError } = await supabase
+  const { data: templates } = await supabase
     .from('email_templates')
     .select('*')
     .eq('sequence_id', params.id)
     .order('order_index', { ascending: true })
 
   // Fetch contact sequences stats
-  const { data: contactSequences, error: contactSequencesError } = await supabase
+  const { data: contactSequences } = await supabase
     .from('contact_sequences')
     .select('status')
     .eq('sequence_id', params.id)

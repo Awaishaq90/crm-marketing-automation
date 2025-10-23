@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { BarChart3, Mail, Users, TrendingUp, TrendingDown } from 'lucide-react'
+import { BarChart3, Mail, Users, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
 interface AnalyticsPageProps {
@@ -35,9 +35,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
   // Fetch analytics data
   const [
     { data: contactSequences },
-    { data: emailLogs },
-    { data: totalContacts },
-    { data: activeContacts }
+    { data: emailLogs }
   ] = await Promise.all([
     // Contact sequences stats
     supabase
