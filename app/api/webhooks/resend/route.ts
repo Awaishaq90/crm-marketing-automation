@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
     console.log('=== PARSED EVENT ===')
     console.log('Event type:', event.type)
     console.log('Event data ID:', event.data?.id)
+    console.log('=== FULL WEBHOOK PAYLOAD ===')
+    console.log(JSON.stringify(event, null, 2))
+    console.log('=== END FULL PAYLOAD ===')
     
     const supabase = await createClient()
     console.log('Supabase client created')
@@ -144,14 +147,17 @@ async function handleEmailDelivered(supabase: SupabaseClient, data: WebhookData)
 
 async function handleEmailOpened(supabase: SupabaseClient, data: WebhookData) {
   try {
-    console.log('handleEmailOpened - looking for email with resend_email_id:', data.id)
+    // Try multiple possible locations for the email ID
+    const emailId = data.id || data.email_id || data.message_id || data.emailId || data.messageId
+    console.log('handleEmailOpened - looking for email with resend_email_id:', emailId)
+    console.log('Available data keys:', Object.keys(data))
     const timestamp = new Date().toISOString()
     
     // Get current email log to check existing status
     const { data: emailLog, error: fetchError } = await supabase
       .from('email_logs')
       .select('id, status, opened_at, open_count')
-      .eq('resend_email_id', data.id)
+      .eq('resend_email_id', emailId)
       .single()
 
     if (fetchError) {
@@ -160,7 +166,7 @@ async function handleEmailOpened(supabase: SupabaseClient, data: WebhookData) {
     }
 
     if (!emailLog) {
-      console.log('No email log found for resend_email_id:', data.id)
+      console.log('No email log found for resend_email_id:', emailId)
       return
     }
     
@@ -191,7 +197,7 @@ async function handleEmailOpened(supabase: SupabaseClient, data: WebhookData) {
     const { error: updateError } = await supabase
       .from('email_logs')
       .update(updateData)
-      .eq('resend_email_id', data.id)
+      .eq('resend_email_id', emailId)
 
     if (updateError) {
       console.error('Error updating email log:', updateError)
@@ -221,16 +227,23 @@ async function handleEmailOpened(supabase: SupabaseClient, data: WebhookData) {
 
 async function handleEmailClicked(supabase: SupabaseClient, data: WebhookData) {
   try {
+    // Try multiple possible locations for the email ID
+    const emailId = data.id || data.email_id || data.message_id || data.emailId || data.messageId
+    console.log('handleEmailClicked - looking for email with resend_email_id:', emailId)
+    console.log('Available data keys:', Object.keys(data))
     const timestamp = new Date().toISOString()
     
     // Get current email log to check existing status
     const { data: emailLog } = await supabase
       .from('email_logs')
       .select('id, status, opened_at, clicked_at, open_count, click_count')
-      .eq('resend_email_id', data.id)
+      .eq('resend_email_id', emailId)
       .single()
 
-    if (!emailLog) return
+    if (!emailLog) {
+      console.log('No email log found for resend_email_id:', emailId)
+      return
+    }
 
     // Prepare update data
     const updateData: Record<string, unknown> = {
@@ -260,19 +273,33 @@ async function handleEmailClicked(supabase: SupabaseClient, data: WebhookData) {
     }
 
     // Update email log
-    await supabase
+    console.log('Updating email log with data:', updateData)
+    const { error: updateError } = await supabase
       .from('email_logs')
       .update(updateData)
-      .eq('resend_email_id', data.id)
+      .eq('resend_email_id', emailId)
+
+    if (updateError) {
+      console.error('Error updating email log:', updateError)
+      return
+    }
+
+    console.log('Email log updated successfully')
 
     // Insert event record
-    await supabase
+    const { error: eventError } = await supabase
       .from('email_events')
       .insert({
         email_log_id: emailLog.id,
         event_type: 'clicked',
         event_data: data
       })
+
+    if (eventError) {
+      console.error('Error inserting email event:', eventError)
+    } else {
+      console.log('Email event inserted successfully')
+    }
   } catch (error) {
     console.error('Error updating email clicked status:', error)
   }
