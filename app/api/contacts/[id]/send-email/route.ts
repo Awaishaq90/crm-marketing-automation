@@ -7,6 +7,7 @@ interface RouteParams {
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
+  console.log('=== API ROUTE CALLED ===')
   const { id } = await params
   const supabase = await createClient()
   
@@ -17,6 +18,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
 
   const { subject, bodyHtml, bodyText, sender_email } = await request.json()
+  
+  console.log('=== EMAIL SEND DEBUG ===')
+  console.log('Request body:', { subject, bodyHtml, bodyText, sender_email })
 
   // Validate inputs
   if (!subject || !bodyHtml) {
@@ -34,18 +38,27 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
   }
 
-  // Get sender name if sender_email is provided
+  // Get sender name and reply-to email if sender_email is provided
   let senderName = 'CRM Outreach'
+  let replyToEmail: string | undefined
   if (sender_email) {
-    const { data: sender } = await supabase
+    console.log('Looking for sender email:', sender_email)
+    const { data: sender, error: senderError } = await supabase
       .from('sender_emails')
-      .select('name')
+      .select('name, reply_to_email')
       .eq('email', sender_email)
       .single()
+    
+    console.log('Sender query result:', { sender, senderError })
+    
     if (sender) {
       senderName = sender.name
+      replyToEmail = sender.reply_to_email
+      console.log('Individual email - Sender data:', { name: sender.name, reply_to_email: sender.reply_to_email })
     }
   }
+  
+  console.log('Individual email - replyToEmail:', replyToEmail)
 
   // Process template with personalization
   const processedHtml = EmailService.processTemplate(bodyHtml, contact.name)
@@ -53,15 +66,21 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const unsubscribeUrl = EmailService.generateUnsubscribeUrl(id)
 
   // Send email
-  const result = await EmailService.sendEmail({
+  const emailPayloadForLog = {
     to: contact.email,
     subject,
     html: processedHtml,
     text: processedText,
     from: sender_email,
     fromName: senderName,
+    replyTo: replyToEmail,
     unsubscribeUrl
-  })
+  }
+  
+  console.log('=== ABOUT TO CALL EmailService.sendEmail ===')
+  console.log('emailPayloadForLog:', JSON.stringify(emailPayloadForLog, null, 2))
+  
+  const result = await EmailService.sendEmail(emailPayloadForLog)
 
   // Log email
   await supabase.from('email_logs').insert({
@@ -76,5 +95,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     sent_at: new Date().toISOString()
   })
 
-  return NextResponse.json({ success: result.success, emailId: result.success ? result.emailId : null })
+  return NextResponse.json({ 
+    success: result.success, 
+    emailId: result.success ? result.emailId : null,
+    debug: {
+      sender_email,
+      senderName,
+      replyToEmail,
+      hasReplyTo: !!replyToEmail
+    }
+  })
 }

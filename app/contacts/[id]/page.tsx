@@ -6,11 +6,12 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Plus, Mail, Phone, Building, Calendar, Tag, Globe } from 'lucide-react'
 import Link from 'next/link'
+import EmailReplies from '@/components/email-replies'
 
 interface ContactPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function ContactPage({ params }: ContactPageProps) {
@@ -22,11 +23,13 @@ export default async function ContactPage({ params }: ContactPageProps) {
     redirect('/login')
   }
 
+  const { id } = await params
+
   // Fetch contact
   const { data: contact, error: contactError } = await supabase
     .from('contacts')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (contactError || !contact) {
@@ -40,7 +43,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
       *,
       created_by_user:created_by
     `)
-    .eq('contact_id', params.id)
+    .eq('contact_id', id)
     .order('created_at', { ascending: false })
 
   // Fetch email logs for this contact
@@ -51,7 +54,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
       email_sequences(name),
       email_templates(subject)
     `)
-    .eq('contact_id', params.id)
+    .eq('contact_id', id)
     .order('created_at', { ascending: false })
 
   const getStatusColor = (status: string) => {
@@ -125,7 +128,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
               <Link href="/contacts">
                 <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">Back to Contacts</Button>
               </Link>
-              <Link href={`/contacts/${params.id}/send-email`}>
+              <Link href={`/contacts/${id}/send-email`}>
                 <Button className="bg-primary hover:bg-primary/90">
                   <Mail className="w-4 h-4 mr-2" />
                   Send Email
@@ -334,6 +337,9 @@ export default async function ContactPage({ params }: ContactPageProps) {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Email Replies */}
+              <EmailReplies contactId={id} />
             </div>
           </div>
         </div>

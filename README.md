@@ -6,10 +6,12 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 
 ### 📧 **Advanced Email Management**
 - **Multi-Sender Support**: Configure multiple sender emails with custom names
+- **Reply-To Configuration**: Set custom reply-to addresses for better email management
 - **Email Sequences**: Create automated multi-step email campaigns
 - **Rich Templates**: HTML email templates with personalization
 - **Smart Scheduling**: Customizable email intervals and timing
 - **Unsubscribe Management**: Built-in unsubscribe functionality
+- **Email Replies**: Track and manage incoming email replies
 
 ### 👥 **Contact Management**
 - **CSV Import**: Bulk import contacts from CSV files
@@ -21,13 +23,15 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 - **Email Performance**: Open rates, click tracking, and delivery stats
 - **Real-time Webhooks**: Live email event tracking via Resend
 - **Bounce Handling**: Automatic bounce detection and management
+- **Reply Tracking**: Monitor and manage email responses
 - **Engagement Metrics**: Comprehensive analytics dashboard
 
 ### ⚙️ **Advanced Configuration**
-- **Sender Email Settings**: Manage multiple verified sender addresses
+- **Sender Email Settings**: Manage multiple verified sender addresses with reply-to configuration
 - **Domain Verification**: Support for custom domains
 - **Queue Management**: Reliable email delivery with retry logic
 - **Security**: Row-level security and authentication
+- **Email Forwarding**: Configure reply-to addresses for better email management
 
 ## 🛠️ Tech Stack
 
@@ -97,6 +101,7 @@ npm run dev
 7. **Configure sender emails:**
    - Go to `/settings` in your application
    - Add your verified sender email addresses
+   - Configure reply-to addresses for better email management
    - Set a default sender
 
 ## 🗄️ Database Schema
@@ -109,13 +114,15 @@ The application uses the following main tables:
 - `contact_sequences` - Contact-campaign relationships
 - `email_queue` - Email sending queue with sender information
 - `email_logs` - Email delivery tracking and analytics
-- `sender_emails` - Configured sender email addresses
+- `sender_emails` - Configured sender email addresses with reply-to settings
+- `email_replies` - Track incoming email replies
 
 ## 🔌 API Routes
 
 - `POST /api/sequences/[id]/trigger` - Trigger email sequence
 - `POST /api/contacts/[id]/send-email` - Send individual email
 - `POST /api/webhooks/resend` - Resend webhook handler
+- `POST /api/webhooks/email-replies` - Handle incoming email replies
 - `POST /api/auth/logout` - User logout
 - `POST /api/cron/send-emails` - Process email queue
 
@@ -166,28 +173,46 @@ npm start
 - **Rich HTML Templates**: Professional email designs
 - **Personalization**: Use `{{NAME}}` and other variables
 - **Sender Management**: Choose from configured sender emails
+- **Reply-To Configuration**: Set custom reply-to addresses for each sender
 
 ### 📊 Analytics & Tracking
 - **Email Performance**: Open rates, click tracking, delivery stats
 - **Real-time Webhooks**: Live email event tracking
 - **Bounce Handling**: Automatic bounce detection and management
+- **Reply Tracking**: Monitor and manage email responses
 - **Unsubscribe Management**: Built-in unsubscribe functionality
 - **Engagement Metrics**: Comprehensive analytics dashboard
 
 ### ⚙️ Advanced Configuration
-- **Multi-Sender Support**: Configure multiple sender email addresses
+- **Multi-Sender Support**: Configure multiple sender email addresses with reply-to settings
 - **Domain Verification**: Support for custom domains
 - **Queue Management**: Reliable email delivery with retry logic
+- **Email Forwarding**: Configure reply-to addresses for better email management
 - **Security**: Row-level security and authentication
 - **Settings Management**: Centralized configuration
 
+## 📧 Email Reply Management
+
+### Reply-To Configuration
+- **Custom Reply-To Addresses**: Set Gmail or other email addresses to receive replies
+- **Sender Management**: Configure different reply-to addresses for different senders
+- **Email Forwarding**: Replies automatically go to your configured inbox
+- **Reply Tracking**: Monitor and manage incoming email responses
+
+### Setup Instructions
+1. **Configure Sender Emails**: Go to `/settings` and add your sender email addresses
+2. **Set Reply-To Addresses**: Add your Gmail or preferred email for receiving replies
+3. **Test Email Flow**: Send test emails and verify replies go to the correct address
+4. **Monitor Responses**: Track replies in the contact details page
+
 ## 🎯 Use Cases
 
-- **Lead Nurturing**: Automated follow-up sequences
+- **Lead Nurturing**: Automated follow-up sequences with reply management
 - **Customer Onboarding**: Welcome series and tutorials
 - **Sales Outreach**: Personalized prospecting campaigns
 - **Event Marketing**: Event invitations and reminders
 - **Newsletter Management**: Regular content distribution
+- **Customer Support**: Manage customer inquiries through email replies
 
 ## 🤝 Contributing
 

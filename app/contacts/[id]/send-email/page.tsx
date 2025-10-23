@@ -63,6 +63,7 @@ export default function SendEmailPage() {
     setMessage('')
     
     try {
+      console.log('Sending email with formData:', JSON.stringify(formData, null, 2))
       const response = await fetch(`/api/contacts/${params.id}/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,6 +71,9 @@ export default function SendEmailPage() {
       })
 
       const result = await response.json()
+      
+      console.log('API Response:', result)
+      console.log('Debug Info:', JSON.stringify(result.debug, null, 2))
       
       if (result.success) {
         router.push(`/contacts/${params.id}`)

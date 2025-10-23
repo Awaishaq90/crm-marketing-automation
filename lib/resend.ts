@@ -8,6 +8,7 @@ export interface EmailData {
   html: string
   from?: string // Optional sender email, defaults to outreach@domain
   fromName?: string // Optional sender name, defaults to CRM Outreach
+  replyTo?: string // Optional reply-to email address
   text?: string
   unsubscribeUrl?: string
 }
@@ -34,14 +35,38 @@ export class EmailService {
       const senderEmail = emailData.from || `outreach@${process.env.EMAIL_DOMAIN || 'yourdomain.com'}`
       const senderName = emailData.fromName || 'CRM Outreach'
       
-      const { data, error } = await resend.emails.send({
+      const emailPayload: any = {
         from: `${senderName} <${senderEmail}>`,
         to: [emailData.to],
         subject: emailData.subject,
         html: emailData.html,
         text: emailData.text,
         headers
-      })
+      }
+      
+      // Add reply_to if provided (try both formats)
+      if (emailData.replyTo) {
+        emailPayload.reply_to = emailData.replyTo
+        emailPayload.replyTo = emailData.replyTo  // Also try camelCase
+      }
+
+      // Debug logging
+      const fs = require('fs')
+      const debugInfo = {
+        timestamp: new Date().toISOString(),
+        emailData: emailData,
+        replyToValue: emailData.replyTo,
+        replyToType: typeof emailData.replyTo,
+        payloadReplyTo: emailPayload.reply_to,
+        fullPayload: emailPayload
+      }
+      fs.appendFileSync('email-debug.log', JSON.stringify(debugInfo, null, 2) + '\n---\n')
+      
+      console.log('EmailService - emailData.replyTo:', emailData.replyTo)
+      console.log('EmailService - payload.reply_to:', emailPayload.reply_to)
+      console.log('EmailService - payload.replyTo:', emailPayload.replyTo)
+      console.log('EmailService - Calling resend.emails.send with:', emailPayload)
+      const { data, error } = await resend.emails.send(emailPayload as any)
 
       if (error) {
         throw new Error(`Resend error: ${error.message}`)

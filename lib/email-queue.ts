@@ -216,18 +216,23 @@ export class EmailQueue {
       const { EmailService } = await import('@/lib/resend')
       const supabase = await this.getSupabase()
       
-      // Fetch sender name if sender_email is provided
+      // Fetch sender name and reply-to email if sender_email is provided
       let senderName = 'CRM Outreach'
+      let replyToEmail: string | undefined
       if (queueItem.sender_email) {
         const { data: sender } = await supabase
           .from('sender_emails')
-          .select('name')
+          .select('name, reply_to_email')
           .eq('email', queueItem.sender_email)
           .single()
         if (sender) {
           senderName = sender.name
+          replyToEmail = sender.reply_to_email
+          console.log('Sender data:', { name: sender.name, reply_to_email: sender.reply_to_email })
         }
       }
+      
+      console.log('Email queue - replyToEmail:', replyToEmail)
       
       // Generate unsubscribe URL
       const unsubscribeUrl = EmailService.generateUnsubscribeUrl(queueItem.contact_id)
@@ -256,6 +261,7 @@ export class EmailQueue {
         text: processedText,
         from: queueItem.sender_email,
         fromName: senderName,
+        replyTo: replyToEmail,
         unsubscribeUrl
       })
 

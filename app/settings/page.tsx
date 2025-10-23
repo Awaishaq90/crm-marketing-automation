@@ -16,6 +16,7 @@ interface SenderEmail {
   name: string
   is_default: boolean
   active: boolean
+  reply_to_email?: string
 }
 
 export default function SettingsPage() {
@@ -26,7 +27,8 @@ export default function SettingsPage() {
   const [newSender, setNewSender] = useState({
     email: '',
     name: '',
-    is_default: false
+    is_default: false,
+    reply_to_email: ''
   })
   const supabase = createClient()
 
@@ -40,6 +42,7 @@ export default function SettingsPage() {
       .select('*')
       .order('is_default', { ascending: false })
       .order('name')
+    console.log('Loaded sender emails:', data)
     setSenderEmails(data || [])
     setIsLoading(false)
   }
@@ -49,13 +52,14 @@ export default function SettingsPage() {
     setIsLoading(true)
     
     try {
+      console.log('Adding sender with data:', newSender)
       const { error } = await supabase
         .from('sender_emails')
         .insert([newSender])
 
       if (error) throw error
 
-      setNewSender({ email: '', name: '', is_default: false })
+      setNewSender({ email: '', name: '', is_default: false, reply_to_email: '' })
       setMessage('Sender email added successfully')
       loadSenderEmails()
     } catch (error) {
@@ -187,6 +191,19 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="reply_to_email">Reply-To Email (Optional)</Label>
+                <Input
+                  id="reply_to_email"
+                  type="email"
+                  value={newSender.reply_to_email}
+                  onChange={(e) => setNewSender({...newSender, reply_to_email: e.target.value})}
+                  placeholder="your-email@gmail.com"
+                />
+                <p className="text-sm text-gray-500">
+                  Replies will be sent to this address instead of the sender email
+                </p>
+              </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="is_default"
@@ -229,6 +246,11 @@ export default function SettingsPage() {
                         </span>
                       )}
                     </div>
+                    {sender.reply_to_email && (
+                      <div className="mt-1 text-sm text-gray-600">
+                        Reply-to: {sender.reply_to_email}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     {!sender.is_default && (
