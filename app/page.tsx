@@ -58,7 +58,7 @@ export default async function Dashboard() {
   ] = await Promise.all([
     supabase
       .from('email_logs')
-      .select('id, sent_at, contacts(name, email), email_templates(subject)')
+      .select('id, sent_at, subject, email_type, contacts(name, email), email_templates(subject), email_sequences(name)')
       .not('sent_at', 'is', null)
       .order('sent_at', { ascending: false })
       .limit(3),
@@ -87,10 +87,13 @@ export default async function Dashboard() {
     if (email.sent_at) {
       const contact = email.contacts as { name?: string; email?: string } | null
       const template = email.email_templates as { subject?: string } | null
+      const sequence = email.email_sequences as { name?: string } | null
+      const subject = email.subject || template?.subject || 'No subject'
+      const emailType = email.email_type === 'individual' ? 'Individual Email' : (sequence?.name || 'Unknown Sequence')
       activities.push({
         type: 'email',
         timestamp: email.sent_at,
-        description: `Email sent to ${contact?.name || contact?.email || 'Unknown'}: ${template?.subject || 'No subject'}`
+        description: `Email sent to ${contact?.name || contact?.email || 'Unknown'}: ${subject} (${emailType})`
       })
     }
   })

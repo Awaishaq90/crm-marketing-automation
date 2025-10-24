@@ -90,10 +90,15 @@ export class EmailService {
   static processTemplate(template: string, contactName?: string, unsubscribeUrl?: string): string {
     let processed = template
 
-    // Replace placeholders
+    // Replace placeholders (case-insensitive)
     if (contactName) {
-      processed = processed.replace(/{{CONTACT_NAME}}/g, contactName)
-      processed = processed.replace(/{{NAME}}/g, contactName)
+      // Handle both {{name}} and {{NAME}} variations
+      processed = processed.replace(/\{\{CONTACT_NAME\}\}/gi, contactName)
+      processed = processed.replace(/\{\{NAME\}\}/gi, contactName)
+      // Also handle HTML-encoded curly braces from rich text editors
+      processed = processed.replace(/\{\{name\}\}/gi, contactName)
+      processed = processed.replace(/&#123;&#123;name&#125;&#125;/gi, contactName)
+      processed = processed.replace(/&#123;&#123;NAME&#125;&#125;/gi, contactName)
     }
 
     // Add unsubscribe link if not already present

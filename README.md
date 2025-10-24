@@ -26,6 +26,17 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 - ✅ **Responsive Tables**: Horizontal scroll for group member tables on all screen sizes
 - ✅ **Inline Status Editing**: Edit contact status directly from group member tables
 - ✅ **Database Schema**: Complete groups system with proper relationships and RLS policies
+- ✅ **Group Selection**: Add contacts to groups during contact creation with dropdown selection
+- ✅ **Visual Group Indicators**: Color-coded group options in contact creation form
+
+### 🆕 Rich Text Email Editor
+- ✅ **WYSIWYG Editor**: Gmail-like rich text editor for composing emails using Tiptap
+- ✅ **Formatting Tools**: Bold, italic, underline, bullet lists, numbered lists, and links
+- ✅ **Personalization**: Insert `{{name}}` placeholder with dedicated button
+- ✅ **HTML to Plain Text**: Automatic conversion for email compatibility
+- ✅ **Template Support**: Rich text editing for email sequence templates
+- ✅ **Individual Emails**: Rich text composition for one-off emails
+- ✅ **Auto-Generation**: Plain text version automatically created from HTML content
 
 ### New API Endpoints
 - ✅ `PATCH /api/contacts/[id]/status` - Update contact lead status
@@ -42,10 +53,12 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 - **Multi-Sender Support**: Configure multiple sender emails with custom names
 - **Reply-To Configuration**: Set custom reply-to addresses for better email management
 - **Email Sequences**: Create automated multi-step email campaigns
-- **Rich Templates**: HTML email templates with personalization
+- **Rich Text Editor**: Gmail-like WYSIWYG editor for composing emails with formatting tools
+- **Rich Templates**: HTML email templates with personalization and rich text editing
 - **Smart Scheduling**: Customizable email intervals and timing
 - **Unsubscribe Management**: Built-in unsubscribe functionality
 - **Email Replies**: Track and manage incoming email replies
+- **View Email History**: Preview sent emails with full HTML and plain text content
 
 ### 👥 **Contact Management**
 - **CSV Import**: Bulk import contacts from CSV files
@@ -54,8 +67,9 @@ A modern, full-featured CRM system built with Next.js 15, Supabase, and Resend f
 - **Inline Status Editing**: Update contact status directly from the table
 - **Contact Editing**: Full contact editing with dedicated edit page
 - **Contact Organization**: Tags, lead status, and detailed profiles
-- **Individual Emails**: Send personalized one-off emails
-- **Contact History**: Track all interactions and communications
+- **Individual Emails**: Send personalized one-off emails with rich text editor
+- **Contact History**: Track all interactions and communications with "View Email" functionality
+- **Group Assignment**: Add contacts to groups during creation with visual group selection
 
 ### 👥 **Contact Groups**
 - **Group Management**: Create, edit, and delete contact groups with color coding
@@ -176,6 +190,8 @@ The application uses the following main tables:
 - **StatusSelect** (`components/status-select.tsx`) - Inline dropdown for editing contact status
 - **EmailReplies** (`components/email-replies.tsx`) - Display and manage email replies
 - **AddContactsToGroup** (`components/add-contacts-to-group.tsx`) - Modal for adding contacts to groups
+- **RichTextEditor** (`components/rich-text-editor.tsx`) - Gmail-like WYSIWYG editor for email composition
+- **EmailHistoryTable** (`components/email-history-table.tsx`) - Contact email history with "View Email" functionality
 
 ### Custom Hooks
 - **useDebounce** (`lib/hooks/use-debounce.ts`) - Debounce hook for optimized search performance
@@ -183,7 +199,7 @@ The application uses the following main tables:
 ## 🔌 API Routes
 
 ### Contact Management
-- `POST /api/contacts/[id]/send-email` - Send individual email
+- `POST /api/contacts/[id]/send-email` - Send individual email with rich text editor
 - `PATCH /api/contacts/[id]/status` - Update contact status
 - `PATCH /api/contacts/[id]` - Update full contact details
 
@@ -279,14 +295,18 @@ npm start
 - **Responsive Tables**: Horizontal scroll for group member tables on all screen sizes
 - **Inline Status Editing**: Edit contact status directly from group member tables
 - **Group Navigation**: Easy access to groups from dashboard Quick Actions
+- **Group Selection**: Add contacts to groups during creation with visual dropdown
+- **Color-Coded Options**: Visual group indicators with color circles in selection dropdown
 
 ### 📧 Email Sequences
 - **Multi-step Campaigns**: Create sophisticated email sequences
 - **Customizable Intervals**: Set timing between emails (days)
-- **Rich HTML Templates**: Professional email designs
-- **Personalization**: Use `{{NAME}}` and other variables
+- **Rich Text Editor**: Gmail-like WYSIWYG editor for creating email templates
+- **Rich HTML Templates**: Professional email designs with formatting tools
+- **Personalization**: Use `{{NAME}}` and other variables with easy insertion
 - **Sender Management**: Choose from configured sender emails
 - **Reply-To Configuration**: Set custom reply-to addresses for each sender
+- **Auto Plain Text**: Automatic conversion from HTML to plain text for email compatibility
 
 ### 📊 Analytics & Tracking
 - **Live Dashboard**: Real-time statistics showing total contacts, sequences, emails sent, and open rates
@@ -347,12 +367,14 @@ npm start
 
 ## 🎯 Use Cases
 
-- **Lead Nurturing**: Automated follow-up sequences with reply management
-- **Customer Onboarding**: Welcome series and tutorials
-- **Sales Outreach**: Personalized prospecting campaigns
-- **Event Marketing**: Event invitations and reminders
-- **Newsletter Management**: Regular content distribution
+- **Lead Nurturing**: Automated follow-up sequences with rich text emails and reply management
+- **Customer Onboarding**: Welcome series and tutorials with professional formatting
+- **Sales Outreach**: Personalized prospecting campaigns with group organization
+- **Event Marketing**: Event invitations and reminders with rich text formatting
+- **Newsletter Management**: Regular content distribution with WYSIWYG editing
 - **Customer Support**: Manage customer inquiries through email replies
+- **Contact Organization**: Group contacts by industry, region, or campaign for targeted outreach
+- **Email Templates**: Create reusable rich text templates for consistent branding
 
 ## 🤝 Contributing
 

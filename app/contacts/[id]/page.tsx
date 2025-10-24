@@ -3,10 +3,10 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Plus, Mail, Phone, Building, Calendar, Tag, Globe, Edit } from 'lucide-react'
 import Link from 'next/link'
 import EmailReplies from '@/components/email-replies'
+import EmailHistoryTable from '@/components/email-history-table'
 
 interface ContactPageProps {
   params: Promise<{
@@ -74,26 +74,6 @@ export default async function ContactPage({ params }: ContactPageProps) {
     }
   }
 
-  const getEmailStatusColor = (status: string) => {
-    switch (status) {
-      case 'sent':
-        return 'bg-status-qualified-bg text-status-qualified border-status-qualified/20'
-      case 'delivered':
-        return 'bg-info-bg text-info border-info/20'
-      case 'opened':
-        return 'bg-status-converted-bg text-status-converted border-status-converted/20'
-      case 'clicked':
-        return 'bg-status-contacted-bg text-status-contacted border-status-contacted/20'
-      case 'replied':
-        return 'bg-status-qualified-bg text-status-qualified border-status-qualified/20'
-      case 'bounced':
-        return 'bg-status-disqualified-bg text-status-disqualified border-status-disqualified/20'
-      case 'failed':
-        return 'bg-status-disqualified-bg text-status-disqualified border-status-disqualified/20'
-      default:
-        return 'bg-muted text-muted-foreground border-border'
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -305,39 +285,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                 </CardHeader>
                 <CardContent>
                   {emailLogs && emailLogs.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Subject</TableHead>
-                          <TableHead>Sequence</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Sent</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {emailLogs.map((log) => (
-                          <TableRow key={log.id}>
-                            <TableCell className="font-medium text-foreground">
-                              {log.email_templates?.subject || 'No subject'}
-                            </TableCell>
-                            <TableCell className="text-foreground">
-                              {log.email_sequences?.name || 'Unknown'}
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={`${getEmailStatusColor(log.status)} border font-medium`}>
-                                {log.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {log.sent_at 
-                                ? new Date(log.sent_at).toLocaleDateString()
-                                : 'Not sent'
-                              }
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                    <EmailHistoryTable emailLogs={emailLogs} />
                   ) : (
                     <p className="text-muted-foreground text-sm">No email history yet</p>
                   )}

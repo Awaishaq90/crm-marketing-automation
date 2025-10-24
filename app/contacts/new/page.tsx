@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -25,10 +25,26 @@ export default function NewContactPage() {
     website_url: '',
     address: ''
   })
+  const [groups, setGroups] = useState<Array<{ id: string; name: string; color: string }>>([])
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const { data: groups } = await supabase
+        .from('contact_groups')
+        .select('id, name, color')
+        .order('name', { ascending: true })
+      
+      if (groups) {
+        setGroups(groups)
+      }
+    }
+    fetchGroups()
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,18 +52,38 @@ export default function NewContactPage() {
     setMessage('')
 
     try {
-      const { error } = await supabase
+      // Insert contact
+      const { data: newContact, error } = await supabase
         .from('contacts')
         .insert({
           ...formData,
           tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : null
         })
+        .select('id')
+        .single()
 
       if (error) {
         setMessage(error.message)
-      } else {
-        router.push('/contacts')
+        setIsLoading(false)
+        return
       }
+
+      // If a group was selected, add contact to group
+      if (selectedGroupId && selectedGroupId !== 'none' && newContact) {
+        const { error: memberError } = await supabase
+          .from('contact_group_members')
+          .insert({
+            group_id: selectedGroupId,
+            contact_id: newContact.id
+          })
+
+        if (memberError) {
+          console.error('Error adding contact to group:', memberError)
+          // Don't fail the whole operation, just log it
+        }
+      }
+
+      router.push('/contacts')
     } catch {
       setMessage('An error occurred while creating the contact')
     }
@@ -146,6 +182,32 @@ export default function NewContactPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="group" className="text-foreground font-medium">Group (Optional)</Label>
+                  <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                    <SelectTrigger className="border-input focus:ring-primary focus:border-primary">
+                      <SelectValue placeholder="Select a group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No group</SelectItem>
+                      {groups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: group.color }}
+                            />
+                            {group.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Assign this contact to a group for organization
+                  </p>
                 </div>
 
                 <div className="space-y-2">
