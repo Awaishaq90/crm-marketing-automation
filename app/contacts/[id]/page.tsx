@@ -3,10 +3,11 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Mail, Phone, Building, Calendar, Tag, Globe, Edit } from 'lucide-react'
+import { Phone, Building, Calendar, Tag, Globe, Mail } from 'lucide-react'
 import Link from 'next/link'
 import EmailReplies from '@/components/email-replies'
 import EmailHistoryTable from '@/components/email-history-table'
+import ContactActions from '@/components/contact-actions'
 
 interface ContactPageProps {
   params: Promise<{
@@ -104,27 +105,10 @@ export default async function ContactPage({ params }: ContactPageProps) {
               <h1 className="text-2xl font-bold text-foreground">{contact.name || 'Unnamed Contact'}</h1>
               <p className="text-muted-foreground">{contact.email}</p>
             </div>
-            <div className="flex space-x-3">
-              <Link href="/contacts">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">Back to Contacts</Button>
-              </Link>
-              <Link href={`/contacts/${id}/edit`}>
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Contact
-                </Button>
-              </Link>
-              <Link href={`/contacts/${id}/send-email`}>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Send Email
-                </Button>
-              </Link>
-              <Button className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Note
-              </Button>
-            </div>
+            <ContactActions 
+              contactId={id} 
+              contactName={contact.name || 'Unnamed Contact'} 
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
