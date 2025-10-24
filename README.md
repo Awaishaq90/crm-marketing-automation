@@ -134,7 +134,7 @@ EMAIL_DOMAIN=yourdomain.com
 # App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# Cron Security
+# Email Queue Processing Security
 CRON_SECRET=your_cron_secret_here
 ```
 
@@ -201,7 +201,29 @@ The application uses the following main tables:
 - `POST /api/webhooks/resend` - Resend webhook handler
 - `POST /api/webhooks/email-replies` - Handle incoming email replies
 - `POST /api/auth/logout` - User logout
-- `POST /api/cron/send-emails` - Process email queue
+- `POST /api/cron/send-emails` - Manually process email queue (requires CRON_SECRET authentication)
+
+## 📧 Email Queue Processing
+
+### Manual Trigger (Recommended)
+
+The email queue for sequences is processed manually to avoid Vercel cron job limits and pricing concerns.
+
+**Trigger email queue processing:**
+
+```bash
+# POST request (recommended)
+curl -X POST https://crm-marketing-automation.vercel.app/api/cron/send-emails \
+  -H "Authorization: Bearer YOUR_CRON_SECRET"
+
+# GET request (for testing)
+curl "https://crm-marketing-automation.vercel.app/api/cron/send-emails?secret=YOUR_CRON_SECRET"
+```
+
+**When to trigger:**
+- After adding contacts to sequences
+- Periodically to process scheduled follow-up emails
+- When you want to ensure all queued emails are sent
 
 ## 🚀 Deployment
 
@@ -233,7 +255,7 @@ npm start
 | `RESEND_API_KEY` | Resend API key for sending emails | Yes |
 | `EMAIL_DOMAIN` | Your verified domain for emails | Yes |
 | `NEXT_PUBLIC_APP_URL` | Application URL | Yes |
-| `CRON_SECRET` | Secret for cron job security | Yes |
+| `CRON_SECRET` | Secret for email queue processing endpoint | Yes |
 
 ## 📋 Features Overview
 
