@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Mail, Users, BarChart3, Edit, Plus, Pause } from 'lucide-react'
+import { Mail, Users, BarChart3, Edit, Plus, Pause, Send } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import SequenceContactsTable from './sequence-contacts-table'
 import AddContactsToSequenceModal from './add-contacts-to-sequence-modal'
 
@@ -61,7 +62,9 @@ export default function SequenceDetailClient({
 }: SequenceDetailClientProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isProcessingQueue, setIsProcessingQueue] = useState(false)
   const [message, setMessage] = useState('')
+  const router = useRouter()
 
   const handleAddContacts = async (contactIds: string[], startImmediately: boolean) => {
     setIsLoading(true)
@@ -84,7 +87,7 @@ export default function SequenceDetailClient({
       if (result.success) {
         setMessage(`Successfully added ${result.added} contacts to sequence${result.existing > 0 ? ` (${result.existing} were already in the sequence)` : ''}`)
         // Refresh the page to show updated contacts
-        window.location.reload()
+        router.refresh()
       } else {
         setMessage(result.error || 'Failed to add contacts to sequence')
       }
@@ -117,7 +120,7 @@ export default function SequenceDetailClient({
       if (result.success) {
         setMessage(result.message)
         // Refresh the page to show updated status
-        window.location.reload()
+        router.refresh()
       } else {
         setMessage(result.error || 'Failed to update contact status')
       }
@@ -143,7 +146,7 @@ export default function SequenceDetailClient({
       if (result.success) {
         setMessage(result.message)
         // Refresh the page to show updated contacts
-        window.location.reload()
+        router.refresh()
       } else {
         setMessage(result.error || 'Failed to remove contacts from sequence')
       }
@@ -152,6 +155,35 @@ export default function SequenceDetailClient({
       setMessage('An error occurred while removing contacts')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleProcessQueue = async () => {
+    setIsProcessingQueue(true)
+    setMessage('')
+    
+    try {
+      const response = await fetch('/api/email-queue/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setMessage(`Successfully processed ${result.processed} emails${result.errors?.length > 0 ? ` (${result.errors.length} errors)` : ''}`)
+        // Refresh to show updated email status
+        router.refresh()
+      } else {
+        setMessage(result.error || 'Failed to process email queue')
+      }
+    } catch (error) {
+      console.error('Error processing email queue:', error)
+      setMessage('An error occurred while processing emails')
+    } finally {
+      setIsProcessingQueue(false)
     }
   }
 
@@ -196,9 +228,17 @@ export default function SequenceDetailClient({
                   Analytics
                 </Button>
               </Link>
-              <Button>
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Sequence
+              <Button 
+                onClick={handleProcessQueue}
+                disabled={isProcessingQueue}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isProcessingQueue ? (
+                  <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                {isProcessingQueue ? 'Processing...' : 'Process Emails'}
               </Button>
             </div>
           </div>
