@@ -109,6 +109,11 @@ export default function TriggerSequencePage() {
   }
 
   const handleContactToggle = (contactId: string) => {
+    // Don't allow toggling contacts that are already in the sequence
+    if (contactsInSequence.includes(contactId)) {
+      return
+    }
+    
     setSelectedContacts(prev => 
       prev.includes(contactId) 
         ? prev.filter(id => id !== contactId)
@@ -133,6 +138,14 @@ export default function TriggerSequencePage() {
       return
     }
 
+    // Filter out contacts that are already in the sequence
+    const availableContacts = selectedContacts.filter(id => !contactsInSequence.includes(id))
+    
+    if (availableContacts.length === 0) {
+      setMessage('All selected contacts are already in this sequence')
+      return
+    }
+
     setIsLoading(true)
     setMessage('')
 
@@ -143,16 +156,26 @@ export default function TriggerSequencePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contactIds: selectedContacts
+          contactIds: availableContacts
         })
       })
 
       const result = await response.json()
 
       if (result.success) {
-        setMessage(`Successfully added ${result.added} contacts to sequence${result.existing > 0 ? ` (${result.existing} were already in the sequence)` : ''}`)
+        const filteredOut = selectedContacts.length - availableContacts.length
+        let message = `Successfully added ${result.added} contacts to sequence`
+        if (result.existing > 0) {
+          message += ` (${result.existing} were already in the sequence)`
+        }
+        if (filteredOut > 0) {
+          message += ` (${filteredOut} were filtered out as they were already in the sequence)`
+        }
+        setMessage(message)
         setSelectedContacts([])
         setSelectedSequence('')
+        // Reload contacts in sequence to update the UI
+        loadContactsInSequence(selectedSequence)
       } else {
         setMessage(result.error || 'Failed to trigger sequence')
       }
