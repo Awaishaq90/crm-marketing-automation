@@ -41,7 +41,16 @@ export default function RichTextEditor({
         codeBlock: false,
         blockquote: false,
         horizontalRule: false,
-        hardBreak: false,
+        hardBreak: {
+          HTMLAttributes: {
+            class: 'line-break',
+          },
+        },
+        paragraph: {
+          HTMLAttributes: {
+            class: 'mb-2',  // Add margin-bottom to paragraphs for spacing
+          },
+        },
       }),
       Link.extend({ priority: 1000 }).configure({
         openOnClick: false,
