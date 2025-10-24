@@ -81,9 +81,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   console.log('emailPayloadForLog:', JSON.stringify(emailPayloadForLog, null, 2))
   
   const result = await EmailService.sendEmail(emailPayloadForLog)
+  
+  console.log('=== EMAIL SEND RESULT ===')
+  console.log('Result:', JSON.stringify(result, null, 2))
+  console.log('Success:', result.success)
+  console.log('Email ID:', result.emailId)
+  console.log('=== END EMAIL SEND RESULT ===')
 
   // Log email
-  await supabase.from('email_logs').insert({
+  const emailLogData = {
     contact_id: id,
     email_type: 'individual',
     subject,
@@ -93,7 +99,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     resend_email_id: result.success ? result.emailId : null,
     status: result.success ? 'sent' : 'failed',
     sent_at: new Date().toISOString()
-  })
+  }
+  
+  console.log('=== SAVING TO DATABASE ===')
+  console.log('Email log data:', JSON.stringify(emailLogData, null, 2))
+  
+  const { data: savedEmail, error: saveError } = await supabase
+    .from('email_logs')
+    .insert(emailLogData)
+    .select()
+    .single()
+    
+  if (saveError) {
+    console.error('Error saving email to database:', saveError)
+  } else {
+    console.log('Email saved successfully:', savedEmail)
+  }
 
   return NextResponse.json({ 
     success: result.success, 
