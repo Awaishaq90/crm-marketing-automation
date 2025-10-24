@@ -154,14 +154,36 @@ async function handleEmailOpened(supabase: SupabaseClient, data: WebhookData) {
     const timestamp = new Date().toISOString()
     
     // Get current email log to check existing status
+    console.log('Searching for email with resend_email_id:', `"${emailId}"`)
+    console.log('Email ID type:', typeof emailId)
+    console.log('Email ID length:', typeof emailId === 'string' ? emailId.length : 'not a string')
+    
     const { data: emailLog, error: fetchError } = await supabase
       .from('email_logs')
-      .select('id, status, opened_at, open_count')
+      .select('id, status, opened_at, open_count, resend_email_id')
       .eq('resend_email_id', emailId)
       .single()
 
     if (fetchError) {
       console.error('Error fetching email log:', fetchError)
+      
+      // Debug: Let's see what emails exist in the database
+      console.log('=== DEBUG: Checking all emails in database ===')
+      const { data: allEmails, error: allEmailsError } = await supabase
+        .from('email_logs')
+        .select('id, resend_email_id, subject, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5)
+      
+      if (allEmailsError) {
+        console.error('Error fetching all emails:', allEmailsError)
+      } else {
+        console.log('Recent emails in database:', allEmails)
+        console.log('Looking for exact match of:', emailId)
+        const exactMatch = allEmails?.find(email => email.resend_email_id === emailId)
+        console.log('Exact match found:', exactMatch)
+      }
+      
       return
     }
 
