@@ -9,6 +9,7 @@ interface QueueItem {
   scheduled_at: string
   priority: number
   status: string
+  retry_count: number
   sender_email?: string
   sender_name?: string
   email_templates?: {

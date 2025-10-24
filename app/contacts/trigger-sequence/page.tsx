@@ -34,6 +34,7 @@ export default function TriggerSequencePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [isLoadingData, setIsLoadingData] = useState(true)
+  const [contactsInSequence, setContactsInSequence] = useState<string[]>([])
   const supabase = createClient()
 
   const loadData = useCallback(async () => {
@@ -73,6 +74,40 @@ export default function TriggerSequencePage() {
     loadData()
   }, [loadData])
 
+  // Load contacts already in the selected sequence
+  const loadContactsInSequence = useCallback(async (sequenceId: string) => {
+    if (!sequenceId) {
+      setContactsInSequence([])
+      return
+    }
+
+    try {
+      const { data: contactSequences, error } = await supabase
+        .from('contact_sequences')
+        .select('contact_id')
+        .eq('sequence_id', sequenceId)
+        .in('status', ['active', 'paused'])
+
+      if (error) {
+        console.error('Error loading contacts in sequence:', error)
+        setContactsInSequence([])
+      } else {
+        const contactIds = contactSequences?.map(cs => cs.contact_id) || []
+        setContactsInSequence(contactIds)
+      }
+    } catch (error) {
+      console.error('Error loading contacts in sequence:', error)
+      setContactsInSequence([])
+    }
+  }, [supabase])
+
+  // Handle sequence selection change
+  const handleSequenceChange = (sequenceId: string) => {
+    setSelectedSequence(sequenceId)
+    setSelectedContacts([]) // Clear selected contacts when sequence changes
+    loadContactsInSequence(sequenceId)
+  }
+
   const handleContactToggle = (contactId: string) => {
     setSelectedContacts(prev => 
       prev.includes(contactId) 
@@ -82,10 +117,13 @@ export default function TriggerSequencePage() {
   }
 
   const handleSelectAll = () => {
-    if (selectedContacts.length === contacts.length) {
+    // Filter out contacts that are already in the sequence
+    const availableContacts = contacts.filter(c => !contactsInSequence.includes(c.id))
+    
+    if (selectedContacts.length === availableContacts.length) {
       setSelectedContacts([])
     } else {
-      setSelectedContacts(contacts.map(c => c.id))
+      setSelectedContacts(availableContacts.map(c => c.id))
     }
   }
 
@@ -191,7 +229,7 @@ export default function TriggerSequencePage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Email Sequence</label>
-                  <Select value={selectedSequence} onValueChange={setSelectedSequence}>
+                  <Select value={selectedSequence} onValueChange={handleSequenceChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a sequence" />
                     </SelectTrigger>
@@ -228,11 +266,16 @@ export default function TriggerSequencePage() {
                       size="sm"
                       onClick={handleSelectAll}
                     >
-                      {selectedContacts.length === contacts.length ? 'Deselect All' : 'Select All'}
+                      {selectedContacts.length === contacts.filter(c => !contactsInSequence.includes(c.id)).length ? 'Deselect All' : 'Select All'}
                     </Button>
                     <Badge variant="outline">
                       {selectedContacts.length} selected
                     </Badge>
+                    {contactsInSequence.length > 0 && (
+                      <Badge variant="secondary">
+                        {contactsInSequence.length} in sequence
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -249,26 +292,39 @@ export default function TriggerSequencePage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {contacts.map((contact) => (
-                        <TableRow key={contact.id}>
-                          <TableCell>
-                            <Checkbox
-                              checked={selectedContacts.includes(contact.id)}
-                              onCheckedChange={() => handleContactToggle(contact.id)}
-                            />
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {contact.name || 'No name'}
-                          </TableCell>
-                          <TableCell>{contact.email}</TableCell>
-                          <TableCell>{contact.company || '-'}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(contact.lead_status)}>
-                              {contact.lead_status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {contacts.map((contact) => {
+                        const isInSequence = contactsInSequence.includes(contact.id)
+                        const isSelected = selectedContacts.includes(contact.id)
+                        
+                        return (
+                          <TableRow key={contact.id} className={isInSequence ? 'bg-gray-50' : ''}>
+                            <TableCell>
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() => handleContactToggle(contact.id)}
+                                disabled={isInSequence}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                {contact.name || 'No name'}
+                                {isInSequence && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    In Sequence
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>{contact.email}</TableCell>
+                            <TableCell>{contact.company || '-'}</TableCell>
+                            <TableCell>
+                              <Badge className={getStatusColor(contact.lead_status)}>
+                                {contact.lead_status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </div>
