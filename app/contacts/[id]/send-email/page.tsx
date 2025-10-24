@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Mail, Send } from 'lucide-react'
 import Link from 'next/link'
+import RichTextEditor from '@/components/rich-text-editor'
 
 export default function SendEmailPage() {
   const params = useParams()
@@ -21,7 +22,6 @@ export default function SendEmailPage() {
   const [formData, setFormData] = useState({
     subject: '',
     bodyHtml: '',
-    bodyText: '',
     sender_email: ''
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -168,31 +168,15 @@ export default function SendEmailPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bodyHtml">HTML Body</Label>
-                <textarea
-                  id="bodyHtml"
-                  value={formData.bodyHtml}
-                  onChange={(e) => setFormData({...formData, bodyHtml: e.target.value})}
-                  placeholder="Enter HTML content for the email"
-                  className="w-full h-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                <Label htmlFor="bodyHtml">Email Body</Label>
+                <RichTextEditor
+                  content={formData.bodyHtml}
+                  onChange={(html) => setFormData({...formData, bodyHtml: html})}
+                  placeholder="Start typing your email... Use the toolbar to format text, add links, and insert personalization variables."
+                  className="min-h-[300px]"
                 />
                 <p className="text-sm text-gray-500">
-                  You can use HTML tags for formatting. Use {`{{name}}`} to personalize with the contact&apos;s name.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bodyText">Plain Text Body (Optional)</Label>
-                <textarea
-                  id="bodyText"
-                  value={formData.bodyText}
-                  onChange={(e) => setFormData({...formData, bodyText: e.target.value})}
-                  placeholder="Enter plain text version of the email"
-                  className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-sm text-gray-500">
-                  Plain text version for email clients that don&apos;t support HTML
+                  Use the toolbar to format your email. Click "Insert Name" to add {`{{name}}`} personalization.
                 </p>
               </div>
             </CardContent>

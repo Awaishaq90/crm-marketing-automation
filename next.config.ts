@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Remove experimental turbo config that might be causing issues
+  serverExternalPackages: ['@supabase/supabase-js']
 };
 
 export default nextConfig;

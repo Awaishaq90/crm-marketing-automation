@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DEFAULT_EMAIL_INTERVALS } from '@/lib/constants'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
+import RichTextEditor from '@/components/rich-text-editor'
+import { htmlToPlainText } from '@/lib/utils'
 
 interface EmailTemplate {
   id?: string
@@ -90,10 +92,11 @@ export default function NewSequencePage() {
         return
       }
 
-      // Create templates
+      // Create templates with auto-generated plain text
       const templatesWithSequenceId = templates.map(template => ({
         ...template,
-        sequence_id: sequence.id
+        sequence_id: sequence.id,
+        body_text: htmlToPlainText(template.body_html) // Auto-generate plain text from HTML
       }))
 
       const { error: templatesError } = await supabase
@@ -251,30 +254,15 @@ export default function NewSequencePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`body-${index}`}>Email Body (HTML) *</Label>
-                      <textarea
-                        id={`body-${index}`}
-                        value={template.body_html}
-                        onChange={(e) => handleTemplateChange(index, 'body_html', e.target.value)}
-                        placeholder="<h1>Welcome!</h1><p>Thank you for signing up...</p>"
-                        className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
+                      <Label htmlFor={`body-${index}`}>Email Body *</Label>
+                      <RichTextEditor
+                        content={template.body_html}
+                        onChange={(html) => handleTemplateChange(index, 'body_html', html)}
+                        placeholder="Start typing your email... Use the toolbar to format text, add links, and insert personalization variables."
+                        className="min-h-[200px]"
                       />
                       <p className="text-sm text-gray-500">
-                        Use HTML formatting. Unsubscribe link will be automatically added.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`body-text-${index}`}>Email Body (Plain Text)</Label>
-                      <textarea
-                        id={`body-text-${index}`}
-                        value={template.body_text}
-                        onChange={(e) => handleTemplateChange(index, 'body_text', e.target.value)}
-                        placeholder="Welcome! Thank you for signing up..."
-                        className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <p className="text-sm text-gray-500">
-                        Plain text version for email clients that don&apos;t support HTML
+                        Use the toolbar to format your email. Click "Insert Name" to add {`{{name}}`} personalization. Plain text will be auto-generated.
                       </p>
                     </div>
                   </CardContent>

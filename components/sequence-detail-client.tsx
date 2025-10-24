@@ -9,7 +9,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import SequenceContactsTable from './sequence-contacts-table'
 import AddContactsToSequenceModal from './add-contacts-to-sequence-modal'
-import { formatDate } from '@/lib/utils'
+import { formatDate, htmlToPlainText } from '@/lib/utils'
+import RichTextEditor from '@/components/rich-text-editor'
 
 interface ContactInSequence {
   id: string
@@ -226,12 +227,18 @@ export default function SequenceDetailClient({
       const template = templateData[templateId]
       if (!template) return
 
+      // Auto-generate plain text from HTML
+      const templateWithPlainText = {
+        ...template,
+        body_text: htmlToPlainText(template.body_html)
+      }
+
       const response = await fetch(`/api/email-templates/${templateId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(template)
+        body: JSON.stringify(templateWithPlainText)
       })
 
       const result = await response.json()
@@ -428,24 +435,16 @@ export default function SequenceDetailClient({
                               />
                             </div>
                             <div>
-                              <label className="text-sm font-medium">HTML Body</label>
-                              <textarea
-                                value={templateData[template.id]?.body_html || ''}
-                                onChange={(e) => handleTemplateChange(template.id, 'body_html', e.target.value)}
-                                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                rows={6}
-                                placeholder="HTML email content"
+                              <label className="text-sm font-medium">Email Body</label>
+                              <RichTextEditor
+                                content={templateData[template.id]?.body_html || ''}
+                                onChange={(html) => handleTemplateChange(template.id, 'body_html', html)}
+                                placeholder="Start typing your email... Use the toolbar to format text, add links, and insert personalization variables."
+                                className="min-h-[200px]"
                               />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Text Body</label>
-                              <textarea
-                                value={templateData[template.id]?.body_text || ''}
-                                onChange={(e) => handleTemplateChange(template.id, 'body_text', e.target.value)}
-                                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                rows={4}
-                                placeholder="Plain text email content"
-                              />
+                              <p className="text-sm text-gray-500 mt-1">
+                                Use the toolbar to format your email. Click "Insert Name" to add {`{{name}}`} personalization. Plain text will be auto-generated.
+                              </p>
                             </div>
                             <div className="flex space-x-2">
                               <Button 

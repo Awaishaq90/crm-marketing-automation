@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { EmailService } from '@/lib/resend'
+import { htmlToPlainText } from '@/lib/utils'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -17,10 +18,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { subject, bodyHtml, bodyText, sender_email } = await request.json()
+  const { subject, bodyHtml, sender_email } = await request.json()
   
   console.log('=== EMAIL SEND DEBUG ===')
-  console.log('Request body:', { subject, bodyHtml, bodyText, sender_email })
+  console.log('Request body:', { subject, bodyHtml, sender_email })
 
   // Validate inputs
   if (!subject || !bodyHtml) {
@@ -62,7 +63,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   // Process template with personalization
   const processedHtml = EmailService.processTemplate(bodyHtml, contact.name)
-  const processedText = EmailService.processTemplate(bodyText || '', contact.name)
+  const bodyText = htmlToPlainText(bodyHtml) // Auto-generate plain text from HTML
+  const processedText = EmailService.processTemplate(bodyText, contact.name)
   const unsubscribeUrl = EmailService.generateUnsubscribeUrl(id)
 
   // Send email
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     email_type: 'individual',
     subject,
     body_html: bodyHtml,
-    body_text: bodyText,
+    body_text: bodyText, // Auto-generated plain text
     sender_email,
     resend_email_id: result.success ? result.emailId : null,
     status: result.success ? 'sent' : 'failed',
