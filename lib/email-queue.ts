@@ -65,22 +65,8 @@ export class EmailQueue {
         throw new Error('No templates found for sequence')
       }
 
-      // Create contact sequences
-      const contactSequences = contactIds.map(contactId => ({
-        contact_id: contactId,
-        sequence_id: sequenceId,
-        status: 'active' as const,
-        current_step: 1,
-        started_at: new Date().toISOString()
-      }))
-
-      const { error: contactSequencesError } = await supabase
-        .from('contact_sequences')
-        .insert(contactSequences)
-
-      if (contactSequencesError) {
-        throw new Error(`Failed to create contact sequences: ${contactSequencesError.message}`)
-      }
+      // Note: contact_sequences are created in the main route handler
+      // This method only handles adding emails to the queue
 
       // Add first emails to queue (immediate)
       const queueItems = contactIds.map(contactId => ({
