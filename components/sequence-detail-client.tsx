@@ -443,7 +443,7 @@ export default function SequenceDetailClient({
                                 className="min-h-[200px]"
                               />
                               <p className="text-sm text-gray-500 mt-1">
-                                Use the toolbar to format your email. Click "Insert Name" to add {`{{name}}`} personalization. Plain text will be auto-generated.
+                                Use the toolbar to format your email. Click &quot;Insert Name&quot; to add {`{{name}}`} personalization. Plain text will be auto-generated.
                               </p>
                             </div>
                             <div className="flex space-x-2">

@@ -176,7 +176,7 @@ export default function SendEmailPage() {
                   className="min-h-[300px]"
                 />
                 <p className="text-sm text-gray-500">
-                  Use the toolbar to format your email. Click "Insert Name" to add {`{{name}}`} personalization.
+                  Use the toolbar to format your email. Click &quot;Insert Name&quot; to add {`{{name}}`} personalization.
                 </p>
               </div>
             </CardContent>

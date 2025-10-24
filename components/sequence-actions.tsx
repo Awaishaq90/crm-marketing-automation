@@ -10,7 +10,7 @@ interface SequenceActionsProps {
   sequenceName: string
 }
 
-export default function SequenceActions({ sequenceId, sequenceName }: SequenceActionsProps) {
+export default function SequenceActions({ sequenceId }: SequenceActionsProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const router = useRouter()
