@@ -65,7 +65,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const processedHtml = EmailService.processTemplate(bodyHtml, contact.name)
   const bodyText = htmlToPlainText(bodyHtml) // Auto-generate plain text from HTML
   const processedText = EmailService.processTemplate(bodyText, contact.name)
-  const unsubscribeUrl = EmailService.generateUnsubscribeUrl(id)
 
   // Send email
   const emailPayloadForLog = {
@@ -75,8 +74,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     text: processedText,
     from: sender_email,
     fromName: senderName,
-    replyTo: replyToEmail,
-    unsubscribeUrl
+    replyTo: replyToEmail
   }
   
   console.log('=== ABOUT TO CALL EmailService.sendEmail ===')

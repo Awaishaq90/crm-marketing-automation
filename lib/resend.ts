@@ -24,11 +24,9 @@ export class EmailService {
       }
 
       const headers: Record<string, string> = {
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
-      }
-      
-      if (emailData.unsubscribeUrl) {
-        headers['List-Unsubscribe'] = `<${emailData.unsubscribeUrl}>`
+        'X-Priority': '3',
+        'X-MSMail-Priority': 'Normal',
+        'Importance': 'Normal'
       }
 
       // Use custom sender if provided, otherwise default to outreach@domain
@@ -50,11 +48,7 @@ export class EmailService {
         emailPayload.replyTo = emailData.replyTo  // Also try camelCase
       }
 
-      // Debug logging
-      console.log('EmailService - emailData.replyTo:', emailData.replyTo)
-      console.log('EmailService - payload.reply_to:', emailPayload.reply_to)
-      console.log('EmailService - payload.replyTo:', emailPayload.replyTo)
-      console.log('EmailService - Calling resend.emails.send with:', emailPayload)
+      // Minimal logging for debugging
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await resend.emails.send(emailPayload as any)
 
@@ -87,7 +81,7 @@ export class EmailService {
   /**
    * Process email template with personalization
    */
-  static processTemplate(template: string, contactName?: string, unsubscribeUrl?: string): string {
+  static processTemplate(template: string, contactName?: string): string {
     let processed = template
 
     // Replace placeholders (case-insensitive)
@@ -101,15 +95,7 @@ export class EmailService {
       processed = processed.replace(/&#123;&#123;NAME&#125;&#125;/gi, contactName)
     }
 
-    // Add unsubscribe link if not already present
-    if (unsubscribeUrl && !processed.includes('unsubscribe')) {
-      const unsubscribeHtml = `
-        <div style="margin-top: 20px; padding: 10px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
-          <p>If you no longer wish to receive these emails, you can <a href="${unsubscribeUrl}" style="color: #666;">unsubscribe here</a>.</p>
-        </div>
-      `
-      processed += unsubscribeHtml
-    }
+    // User will add unsubscribe text manually to templates when needed
 
     return processed
   }

@@ -228,14 +228,10 @@ export class EmailQueue {
       
       console.log('Email queue - replyToEmail:', replyToEmail)
       
-      // Generate unsubscribe URL
-      const unsubscribeUrl = EmailService.generateUnsubscribeUrl(queueItem.contact_id)
-      
       // Process template with personalization
       const processedHtml = EmailService.processTemplate(
         queueItem.email_templates?.body_html || '',
-        queueItem.contacts?.name,
-        unsubscribeUrl
+        queueItem.contacts?.name
       )
 
       const processedText = EmailService.processTemplate(
@@ -255,8 +251,7 @@ export class EmailQueue {
         text: processedText,
         from: queueItem.sender_email,
         fromName: senderName,
-        replyTo: replyToEmail,
-        unsubscribeUrl
+        replyTo: replyToEmail
       })
 
       return result
