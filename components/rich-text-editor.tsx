@@ -43,7 +43,7 @@ export default function RichTextEditor({
         horizontalRule: false,
         hardBreak: false,
       }),
-      Link.configure({
+      Link.extend({ priority: 1000 }).configure({
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-blue-600 underline',

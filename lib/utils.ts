@@ -27,67 +27,50 @@ export function formatDateTime(dateString: string): string {
 /**
  * Convert HTML to plain text for email fallback
  * Strips HTML tags while preserving structure and formatting
+ * Works both client-side and server-side
  */
 export function htmlToPlainText(html: string): string {
   if (!html) return ''
   
-  // Create a temporary DOM element to parse HTML
-  const temp = document.createElement('div')
-  temp.innerHTML = html
+  let text = html
   
-  // Convert various HTML elements to plain text equivalents
-  const convertElement = (element: Element): string => {
-    const tagName = element.tagName.toLowerCase()
-    const text = Array.from(element.childNodes)
-      .map(node => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          return node.textContent || ''
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          return convertElement(node as Element)
-        }
-        return ''
-      })
-      .join('')
-    
-    switch (tagName) {
-      case 'p':
-      case 'div':
-        return text + '\n\n'
-      case 'br':
-        return '\n'
-      case 'li':
-        return '• ' + text + '\n'
-      case 'h1':
-      case 'h2':
-      case 'h3':
-      case 'h4':
-      case 'h5':
-      case 'h6':
-        return text + '\n\n'
-      case 'a':
-        const href = element.getAttribute('href')
-        return href ? `${text} (${href})` : text
-      case 'strong':
-      case 'b':
-        return text // Keep text but remove formatting
-      case 'em':
-      case 'i':
-        return text // Keep text but remove formatting
-      case 'u':
-        return text // Keep text but remove formatting
-      default:
-        return text
-    }
-  }
+  // Replace common HTML entities
+  text = text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
   
-  // Process the HTML and clean up
-  let plainText = convertElement(temp)
+  // Replace block elements with newlines
+  text = text
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
   
-  // Clean up extra whitespace and newlines
-  plainText = plainText
-    .replace(/\n\s*\n\s*\n/g, '\n\n') // Replace multiple newlines with double
-    .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
+  // Handle list items
+  text = text.replace(/<li[^>]*>/gi, '• ')
+  
+  // Handle links - extract text and URL
+  text = text.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '$2 ($1)')
+  
+  // Remove all remaining HTML tags
+  text = text.replace(/<[^>]+>/g, '')
+  
+  // Decode any remaining HTML entities
+  text = text
+    .replace(/&[a-z]+;/gi, ' ')
+    .replace(/&#\d+;/g, ' ')
+  
+  // Clean up whitespace
+  text = text
+    .replace(/\n\s*\n\s*\n/g, '\n\n') // Replace 3+ newlines with 2
+    .replace(/[ \t]+/g, ' ') // Replace multiple spaces with single
+    .replace(/^\s+/gm, '') // Remove leading whitespace from lines
     .trim()
   
-  return plainText
+  return text
 }
