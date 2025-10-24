@@ -296,6 +296,7 @@ export default function GroupDetailPage() {
                         <TableRow>
                           <TableHead className="min-w-[140px]">Name</TableHead>
                           <TableHead className="min-w-[180px]">Email</TableHead>
+                          <TableHead className="min-w-[120px]">Phone</TableHead>
                           <TableHead className="min-w-[120px]">Company</TableHead>
                           <TableHead className="min-w-[100px]">Status</TableHead>
                           <TableHead className="min-w-[120px]">Added</TableHead>
@@ -313,6 +314,11 @@ export default function GroupDetailPage() {
                             <TableCell className="min-w-[180px]">
                               <div className="truncate max-w-[180px]" title={member.contacts?.email}>
                                 {member.contacts?.email}
+                              </div>
+                            </TableCell>
+                            <TableCell className="min-w-[120px]">
+                              <div className="truncate max-w-[120px]" title={member.contacts?.phone || '-'}>
+                                {member.contacts?.phone || '-'}
                               </div>
                             </TableCell>
                             <TableCell className="min-w-[120px]">

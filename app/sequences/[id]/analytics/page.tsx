@@ -85,7 +85,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
     .from('email_logs')
     .select(`
       *,
-      contacts(name, email),
+      contacts(name, email, phone),
       email_templates(subject)
     `)
     .eq('sequence_id', id)
@@ -281,6 +281,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
                   <TableHeader>
                     <TableRow>
                       <TableHead>Contact</TableHead>
+                      <TableHead>Phone</TableHead>
                       <TableHead>Subject</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Sent</TableHead>
@@ -300,6 +301,7 @@ export default async function SequenceAnalyticsPage({ params }: AnalyticsPagePro
                             </div>
                           </div>
                         </TableCell>
+                        <TableCell>{activity.contacts?.phone || '-'}</TableCell>
                         <TableCell>
                           {activity.email_templates?.subject || 'No subject'}
                         </TableCell>

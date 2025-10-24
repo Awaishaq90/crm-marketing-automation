@@ -69,6 +69,7 @@ export default function AddContactsToGroup({ groupId, onContactsAdded, onClose }
     const filtered = contacts.filter(contact => 
       contact.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       contact.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       contact.company?.toLowerCase().includes(searchQuery.toLowerCase())
     )
 

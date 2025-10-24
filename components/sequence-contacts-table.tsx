@@ -13,6 +13,7 @@ interface ContactInSequence {
   contact_id: string
   name: string
   email: string
+  phone: string | null
   company: string | null
   lead_status: string
   status: 'active' | 'paused' | 'completed' | 'unsubscribed'
@@ -180,6 +181,7 @@ export default function SequenceContactsTable({
                 />
               </TableHead>
               <TableHead>Contact</TableHead>
+              <TableHead>Phone</TableHead>
               <TableHead>Company</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Progress</TableHead>
@@ -191,7 +193,7 @@ export default function SequenceContactsTable({
           <TableBody>
             {contacts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-gray-500 py-8">
+                <TableCell colSpan={9} className="text-center text-gray-500 py-8">
                   No contacts in this sequence yet
                 </TableCell>
               </TableRow>
@@ -210,6 +212,7 @@ export default function SequenceContactsTable({
                       <div className="text-sm text-gray-500">{contact.email}</div>
                     </div>
                   </TableCell>
+                  <TableCell>{contact.phone || '-'}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <span>{contact.company || '-'}</span>

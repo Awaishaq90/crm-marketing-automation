@@ -39,9 +39,9 @@ export default async function ContactsPage({
     .from('contacts')
     .select('*')
 
-  // Apply search filter (name or email)
+  // Apply search filter (name, email, or phone)
   if (searchQuery) {
-    query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
+    query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%`)
   }
 
   // Apply company filter
@@ -126,6 +126,7 @@ export default async function ContactsPage({
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
+                      <TableHead>Phone</TableHead>
                       <TableHead>Company</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Created</TableHead>
@@ -139,6 +140,7 @@ export default async function ContactsPage({
                           {contact.name || 'No name'}
                         </TableCell>
                         <TableCell>{contact.email}</TableCell>
+                        <TableCell>{contact.phone || '-'}</TableCell>
                         <TableCell>{contact.company || '-'}</TableCell>
                         <TableCell>
                           <StatusSelect 

@@ -17,6 +17,7 @@ interface ContactInSequence {
   contact_id: string
   name: string
   email: string
+  phone: string | null
   company: string | null
   lead_status: string
   status: 'active' | 'paused' | 'completed' | 'unsubscribed'

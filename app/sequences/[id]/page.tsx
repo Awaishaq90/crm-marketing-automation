@@ -49,6 +49,7 @@ export default async function SequencePage({ params }: SequencePageProps) {
         id,
         name,
         email,
+        phone,
         company,
         lead_status
       )
@@ -79,6 +80,7 @@ export default async function SequencePage({ params }: SequencePageProps) {
       contact_id: contact?.id || '',
       name: contact?.name || '',
       email: contact?.email || '',
+      phone: contact?.phone || null,
       company: contact?.company || null,
       lead_status: contact?.lead_status || '',
       status: cs.status,

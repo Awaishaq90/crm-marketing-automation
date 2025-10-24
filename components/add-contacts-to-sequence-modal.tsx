@@ -14,6 +14,7 @@ import { Search, Users, Plus } from 'lucide-react'
 interface Contact {
   id: string
   email: string
+  phone: string | null
   name: string | null
   company: string | null
   lead_status: string
@@ -53,7 +54,7 @@ export default function AddContactsToSequenceModal({
 
       // Apply filters
       if (searchTerm) {
-        query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,company.ilike.%${searchTerm}%`)
+        query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,company.ilike.%${searchTerm}%`)
       }
 
       if (statusFilter !== 'all') {
@@ -190,6 +191,7 @@ export default function AddContactsToSequenceModal({
                   </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -197,7 +199,7 @@ export default function AddContactsToSequenceModal({
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                         <span className="ml-2">Loading contacts...</span>
@@ -206,7 +208,7 @@ export default function AddContactsToSequenceModal({
                   </TableRow>
                 ) : contacts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-gray-500 py-8">
+                    <TableCell colSpan={6} className="text-center text-gray-500 py-8">
                       No contacts found matching your criteria
                     </TableCell>
                   </TableRow>
@@ -223,6 +225,7 @@ export default function AddContactsToSequenceModal({
                         {contact.name || 'No name'}
                       </TableCell>
                       <TableCell>{contact.email}</TableCell>
+                      <TableCell>{contact.phone || '-'}</TableCell>
                       <TableCell>{contact.company || '-'}</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(contact.lead_status)}>
