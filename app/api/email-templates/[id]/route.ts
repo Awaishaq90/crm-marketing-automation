@@ -1,0 +1,56 @@
+import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+
+interface RouteParams {
+  params: Promise<{
+    id: string
+  }>
+}
+
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params
+    const supabase = await createClient()
+    
+    // Check authentication
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { subject, body_html, body_text } = await request.json()
+
+    // Validate inputs
+    if (!subject || !body_html) {
+      return NextResponse.json({ error: 'Subject and body are required' }, { status: 400 })
+    }
+
+    // Update the template
+    const { data: template, error } = await supabase
+      .from('email_templates')
+      .update({
+        subject,
+        body_html,
+        body_text: body_text || ''
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to update template' }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      template
+    })
+
+  } catch (error) {
+    console.error('Error updating template:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

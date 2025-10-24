@@ -240,11 +240,6 @@ export default async function Dashboard() {
                     Create Email Sequence
                   </Button>
                 </Link>
-                <Link href="/contacts/trigger-sequence">
-                  <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                    Trigger Sequence
-                  </Button>
-                </Link>
                 <Link href="/groups">
                   <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                     <Users className="w-4 h-4 mr-2" />

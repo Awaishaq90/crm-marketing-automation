@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import SequenceContactsTable from './sequence-contacts-table'
 import AddContactsToSequenceModal from './add-contacts-to-sequence-modal'
+import { formatDate } from '@/lib/utils'
 
 interface ContactInSequence {
   id: string
@@ -64,6 +65,8 @@ export default function SequenceDetailClient({
   const [isLoading, setIsLoading] = useState(false)
   const [isProcessingQueue, setIsProcessingQueue] = useState(false)
   const [message, setMessage] = useState('')
+  const [editingTemplate, setEditingTemplate] = useState<string | null>(null)
+  const [templateData, setTemplateData] = useState<{ [key: string]: { subject: string; body_html: string; body_text: string } }>({})
   const router = useRouter()
 
   const handleAddContacts = async (contactIds: string[], startImmediately: boolean) => {
@@ -167,7 +170,10 @@ export default function SequenceDetailClient({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          sequenceId: sequence.id
+        })
       })
 
       const result = await response.json()
@@ -185,6 +191,73 @@ export default function SequenceDetailClient({
     } finally {
       setIsProcessingQueue(false)
     }
+  }
+
+  const handleEditTemplate = (templateId: string) => {
+    setEditingTemplate(templateId)
+    const template = templates.find(t => t.id === templateId)
+    if (template) {
+      setTemplateData(prev => ({
+        ...prev,
+        [templateId]: {
+          subject: template.subject,
+          body_html: template.body_html,
+          body_text: template.body_text
+        }
+      }))
+    }
+  }
+
+  const handleTemplateChange = (templateId: string, field: string, value: string) => {
+    setTemplateData(prev => ({
+      ...prev,
+      [templateId]: {
+        ...prev[templateId],
+        [field]: value
+      }
+    }))
+  }
+
+  const handleSaveTemplate = async (templateId: string) => {
+    setIsLoading(true)
+    setMessage('')
+    
+    try {
+      const template = templateData[templateId]
+      if (!template) return
+
+      const response = await fetch(`/api/email-templates/${templateId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(template)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setMessage('Template updated successfully')
+        setEditingTemplate(null)
+        router.refresh()
+      } else {
+        setMessage(result.error || 'Failed to update template')
+      }
+    } catch (error) {
+      console.error('Error updating template:', error)
+      setMessage('An error occurred while updating template')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCancelEdit = (templateId: string) => {
+    setEditingTemplate(null)
+    setTemplateData(prev => {
+      const newData = { ...prev }
+      delete newData[templateId]
+      return newData
+    })
   }
 
   const existingContactIds = contacts.map(c => c.contact_id)
@@ -323,7 +396,7 @@ export default function SequenceDetailClient({
                 <div>
                   <label className="text-sm font-medium">Created</label>
                   <p className="text-sm text-gray-600 mt-1">
-                    {new Date(sequence.created_at).toLocaleDateString()}
+                    {formatDate(sequence.created_at)}
                   </p>
                 </div>
               </CardContent>
@@ -342,20 +415,78 @@ export default function SequenceDetailClient({
                   <div className="space-y-3">
                     {templates.map((template) => (
                       <div key={template.id} className="border rounded-lg p-3 bg-gray-50">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-medium">Email {template.order_index}</h4>
-                            <p className="text-sm text-gray-600 mt-1">{template.subject}</p>
-                            <div className="mt-2">
-                              <Badge variant="outline" className="text-xs">
-                                Day {sequence.intervals[template.order_index - 1] || 0}
-                              </Badge>
+                        {editingTemplate === template.id ? (
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium">Subject</label>
+                              <input
+                                type="text"
+                                value={templateData[template.id]?.subject || ''}
+                                onChange={(e) => handleTemplateChange(template.id, 'subject', e.target.value)}
+                                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Email subject"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">HTML Body</label>
+                              <textarea
+                                value={templateData[template.id]?.body_html || ''}
+                                onChange={(e) => handleTemplateChange(template.id, 'body_html', e.target.value)}
+                                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                rows={6}
+                                placeholder="HTML email content"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Text Body</label>
+                              <textarea
+                                value={templateData[template.id]?.body_text || ''}
+                                onChange={(e) => handleTemplateChange(template.id, 'body_text', e.target.value)}
+                                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                rows={4}
+                                placeholder="Plain text email content"
+                              />
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button 
+                                onClick={() => handleSaveTemplate(template.id)}
+                                disabled={isLoading}
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {isLoading ? 'Saving...' : 'Save'}
+                              </Button>
+                              <Button 
+                                onClick={() => handleCancelEdit(template.id)}
+                                variant="outline"
+                                size="sm"
+                                disabled={isLoading}
+                              >
+                                Cancel
+                              </Button>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        ) : (
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-medium">Email {template.order_index}</h4>
+                              <p className="text-sm text-gray-600 mt-1">{template.subject}</p>
+                              <div className="mt-2">
+                                <Badge variant="outline" className="text-xs">
+                                  Day {sequence.intervals[template.order_index - 1] || 0}
+                                </Badge>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditTemplate(template.id)}
+                              disabled={isLoading}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

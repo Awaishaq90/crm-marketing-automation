@@ -111,11 +111,11 @@ export class EmailQueue {
   /**
    * Process pending emails from queue (batch processing)
    */
-  async processQueue() {
+  async processQueue(sequenceId?: string) {
     try {
       const supabase = await this.getSupabase()
       // Get pending emails (max batch size)
-      const { data: queueItems, error: queueError } = await supabase
+      let query = supabase
         .from('email_queue')
         .select(`
           *,
@@ -128,6 +128,13 @@ export class EmailQueue {
         .order('priority', { ascending: true })
         .order('scheduled_at', { ascending: true })
         .limit(EMAIL_BATCH_SIZE)
+
+      // Filter by sequence ID if provided
+      if (sequenceId) {
+        query = query.eq('sequence_id', sequenceId)
+      }
+
+      const { data: queueItems, error: queueError } = await query
 
       if (queueError) {
         throw new Error(`Failed to fetch queue items: ${queueError.message}`)

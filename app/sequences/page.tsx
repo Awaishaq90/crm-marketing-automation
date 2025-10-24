@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Mail, Users, BarChart3 } from 'lucide-react'
+import { Plus, Mail, Users, BarChart3, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import SequenceActions from '@/components/sequence-actions'
+import { formatDate } from '@/lib/utils'
 
 export default async function SequencesPage() {
   const supabase = await createClient()
@@ -141,7 +143,7 @@ export default async function SequencesPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {new Date(sequence.created_at).toLocaleDateString()}
+                          {formatDate(sequence.created_at)}
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
@@ -155,6 +157,7 @@ export default async function SequencesPage() {
                                 <BarChart3 className="w-4 h-4" />
                               </Button>
                             </Link>
+                            <SequenceActions sequenceId={sequence.id} sequenceName={sequence.name} />
                           </div>
                         </TableCell>
                       </TableRow>

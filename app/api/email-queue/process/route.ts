@@ -12,9 +12,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get sequence ID from request body (optional)
+    const body = await request.json().catch(() => ({}))
+    const sequenceId = body.sequenceId
+
     // Process email queue
     const emailQueue = new EmailQueue()
-    const result = await emailQueue.processQueue()
+    const result = await emailQueue.processQueue(sequenceId)
 
     return NextResponse.json({
       success: true,
