@@ -227,25 +227,25 @@ export default async function Dashboard() {
                   Common tasks to get started
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-8">
                 <Link href="/contacts">
-                  <Button className="w-full justify-start bg-primary hover:bg-primary/90">
+                  <Button size="lg" className="w-full justify-start bg-primary hover:bg-primary/90 h-12 text-base">
                     View All Contacts
                   </Button>
                 </Link>
                 <Link href="/contacts/import">
-                  <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  <Button variant="outline" size="lg" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground h-12 text-base">
                     Import Contacts
                   </Button>
                 </Link>
                 <Link href="/sequences">
-                  <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  <Button variant="outline" size="lg" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground h-12 text-base">
                     Create Email Sequence
                   </Button>
                 </Link>
                 <Link href="/groups">
-                  <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                    <Users className="w-4 h-4 mr-2" />
+                  <Button variant="outline" size="lg" className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground h-12 text-base">
+                    <Users className="w-5 h-5 mr-2" />
                     Manage Groups
                   </Button>
                 </Link>
@@ -254,10 +254,19 @@ export default async function Dashboard() {
 
             <Card className="card-shadow border-border">
               <CardHeader>
-                <CardTitle className="text-foreground">Recent Activity</CardTitle>
-                <CardDescription>
-                  Latest updates in your CRM
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-foreground">Recent Activity</CardTitle>
+                    <CardDescription>
+                      Latest updates in your CRM
+                    </CardDescription>
+                  </div>
+                  <Link href="/activity">
+                    <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                      View More
+                    </Button>
+                  </Link>
+                </div>
               </CardHeader>
               <CardContent>
                 {sortedActivities.length > 0 ? (
