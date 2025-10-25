@@ -104,6 +104,7 @@ export default function RichTextEditor({
         {/* Text Formatting */}
         <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-2">
           <Button
+            type="button"
             variant={editor.isActive('bold') ? 'default' : 'ghost'}
             size="sm"
             onClick={() => editor.chain().focus().toggleBold().run()}
@@ -112,6 +113,7 @@ export default function RichTextEditor({
             <Bold className="h-4 w-4" />
           </Button>
           <Button
+            type="button"
             variant={editor.isActive('italic') ? 'default' : 'ghost'}
             size="sm"
             onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -120,6 +122,7 @@ export default function RichTextEditor({
             <Italic className="h-4 w-4" />
           </Button>
           <Button
+            type="button"
             variant={editor.isActive('underline') ? 'default' : 'ghost'}
             size="sm"
             onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -132,6 +135,7 @@ export default function RichTextEditor({
         {/* Lists */}
         <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-2">
           <Button
+            type="button"
             variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
             size="sm"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -140,6 +144,7 @@ export default function RichTextEditor({
             <List className="h-4 w-4" />
           </Button>
           <Button
+            type="button"
             variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
             size="sm"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -152,6 +157,7 @@ export default function RichTextEditor({
         {/* Link */}
         <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-2">
           <Button
+            type="button"
             variant={editor.isActive('link') ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setIsLinkModalOpen(true)}
@@ -161,6 +167,7 @@ export default function RichTextEditor({
           </Button>
           {editor.isActive('link') && (
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={removeLink}
@@ -174,6 +181,7 @@ export default function RichTextEditor({
         {/* Personalization Variables */}
         <div className="flex items-center gap-1">
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={() => insertVariable('{{name}}')}
@@ -209,6 +217,7 @@ export default function RichTextEditor({
               </div>
               <div className="flex justify-end gap-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => {
                     setIsLinkModalOpen(false)
@@ -217,7 +226,7 @@ export default function RichTextEditor({
                 >
                   Cancel
                 </Button>
-                <Button onClick={addLink} disabled={!linkUrl.trim()}>
+                <Button type="button" onClick={addLink} disabled={!linkUrl.trim()}>
                   Add Link
                 </Button>
               </div>
